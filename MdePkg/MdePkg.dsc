@@ -71,6 +71,7 @@
   MdePkg/Library/BaseRngLibTimerLib/BaseRngLibTimerLib.inf
 
   MdePkg/Library/BaseSerialPortLibNull/BaseSerialPortLibNull.inf
+  MdePkg/Library/SerialPortLib/SerialIoLib.inf  
   MdePkg/Library/BaseSynchronizationLib/BaseSynchronizationLib.inf
   MdePkg/Library/BaseTimerLibNullTemplate/BaseTimerLibNullTemplate.inf
   MdePkg/Library/BaseUefiDecompressLib/BaseUefiDecompressLib.inf

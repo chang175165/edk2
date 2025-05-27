@@ -37,6 +37,7 @@
   MemoryAllocationLib|MdePkg/Library/UefiMemoryAllocationLib/UefiMemoryAllocationLib.inf
   UefiLib|MdePkg/Library/UefiLib/UefiLib.inf
   BaseLib|MdePkg/Library/BaseLib/BaseLib.inf
+  SerialPortLib|MdePkg/Library/SerialPortLib/SerialIoLib.inf
   BaseMemoryLib|MdePkg/Library/BaseMemoryLib/BaseMemoryLib.inf
   PrintLib|MdePkg/Library/BasePrintLib/BasePrintLib.inf
   FileHandleLib|MdePkg/Library/UefiFileHandleLib/UefiFileHandleLib.inf
@@ -155,6 +156,9 @@
       gEfiShellPkgTokenSpaceGuid.PcdShellLibAutoInitialize|FALSE
   }
   ShellPkg/DynamicCommand/VariablePolicyDynamicCommand/VariablePolicyApp.inf
-
+  ShellPkg/Application/GNRAP/VC.inf
+  ShellPkg/Application/GNRAP/IPReader.inf
+  ShellPkg/Application/GNRAP/IDReader.inf
+  
 [BuildOptions]
   *_*_*_CC_FLAGS = -D DISABLE_NEW_DEPRECATED_INTERFACES
