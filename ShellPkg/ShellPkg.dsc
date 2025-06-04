@@ -132,7 +132,7 @@
   }
 
   ShellPkg/Application/AcpiViewApp/AcpiViewApp.inf
-  ShellPkg/Application/ShellCTestApp/ShellCTestApp.inf
+#  ShellPkg/Application/ShellCTestApp/ShellCTestApp.inf
   ShellPkg/Application/ShellExecTestApp/SA.inf
   ShellPkg/Application/ShellSortTestApp/ShellSortTestApp.inf
 
@@ -156,9 +156,11 @@
       gEfiShellPkgTokenSpaceGuid.PcdShellLibAutoInitialize|FALSE
   }
   ShellPkg/DynamicCommand/VariablePolicyDynamicCommand/VariablePolicyApp.inf
-  ShellPkg/Application/GNRAP/VC.inf
-  ShellPkg/Application/GNRAP/IPReader.inf
-  ShellPkg/Application/GNRAP/IDReader.inf
+  ShellPkg/Application/ShellTestApp/ShellCTestApp.inf
+  ShellPkg/Application/ShellTestApp/ShellFTestApp.inf
+ # ShellPkg/Application/GNRAP/VC.inf
+ # ShellPkg/Application/GNRAP/IPReader.inf
+ # ShellPkg/Application/GNRAP/IDReader.inf
   
 [BuildOptions]
   *_*_*_CC_FLAGS = -D DISABLE_NEW_DEPRECATED_INTERFACES
