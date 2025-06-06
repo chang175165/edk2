@@ -33,10 +33,11 @@
 [LibraryClasses]
   ShellCEntryLib
   UefiLib
-  BaseMemoryLib 
-  ShellLib
-  FileHandleLib
   BaseLib
+  ShellLib
+  PrintLib
+  BaseMemoryLib 
+  FileHandleLib
   MemoryAllocationLib
   
 [Protocols]

@@ -9,6 +9,7 @@
 #include "VC.h"
 
 #include <Library/SerialPortLib.h>
+#include <Library/UefiBootServicesTableLib.h>
 
 #define RETRY                           5
 

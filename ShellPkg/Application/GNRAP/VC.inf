@@ -13,7 +13,7 @@
 
 [Defines]
   INF_VERSION                    = 0x00010005
-  BASE_NAME                      = VC
+  BASE_NAME                      = t1
   FILE_GUID                      = 67b1e8f4-7c75-4281-a9c6-b73f9c3b05d6
   MODULE_TYPE                    = UEFI_APPLICATION
   VERSION_STRING                 = 1.0
@@ -43,11 +43,9 @@
   ShellCEntryLib
   BaseLib
   IoLib
+  PrintLib
   SerialPortLib
   BaseMemoryLib
   FileHandleLib
-  PrintLib
-
-[Protocols]
-  gEfiSimpleFileSystemProtocolGuid
-
+  MemoryAllocationLib
+  UefiBootServicesTableLib

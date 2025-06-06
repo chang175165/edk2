@@ -1,20 +1,22 @@
+
+
 #include <Uefi.h>
 #include <Library/UefiLib.h>
+#include <Library/BaseLib.h>
+#include <Library/ShellLib.h>
+#include <Library/PrintLib.h>
+#include <Library/FileHandleLib.h>
 #include <Library/BaseMemoryLib.h>
 #include <Library/ShellCEntryLib.h>
-#include <Library/ShellLib.h>                 
-#include <Library/FileHandleLib.h>
-#include <Library/BaseLib.h>
 #include <Library/MemoryAllocationLib.h>
 
-
-#define	VERSION_MAJOR						        0			// Major version
+#define	VERSION_MAJOR						        3			// Major version
 #define	VERSION_MINOR						        1			// Minor version
-#define	VERSION_BUILD						        0			// Build version
+#define	VERSION_BUILD						        2			// Build version
 
-#define V1                              1
+#define V1                              6
 #define V2                              2
-#define V3                              3
+#define V3                              9
 
 /**
   UEFI application entry point which has an interface similar to a
@@ -40,9 +42,13 @@ ShellAppMain(
   EFI_STATUS  Status;
   SHELL_FILE_HANDLE FileHandle;
   CHAR16* FileName;
+  CHAR8 AsciiBuffer[128];
+  CHAR16 UnicodeBuffer[128];
+  UINTN AsciiSize;
+  UINTN UnicodeNum;
 
   if (Argc < 2) {
-    Print(L"Use ftest.efi file name \n");
+    Print(L"Use ftest.efi file name\n");
     return EFI_INVALID_PARAMETER;
   }
 
@@ -60,7 +66,40 @@ ShellAppMain(
     return Status;
   }
 
+  AsciiSPrint(
+    AsciiBuffer,
+    sizeof(AsciiBuffer),
+    "TEST SW Version=%d.%d.%d\n Test2 FW version=%d.%d.%d\n",
+    VERSION_MAJOR, VERSION_MINOR, VERSION_BUILD,
+    V1,V2,V3
+  );
+
+  AsciiSize = AsciiStrLen(AsciiBuffer);
+
+  Status = ShellWriteFile(
+    FileHandle,
+    &AsciiSize,
+    AsciiBuffer
+  );
+
+  if (EFI_ERROR(Status)) {
+    Print(L"Can't Write File: %r\n", Status);
+    return Status;
+  }
+
   ShellCloseFile(&FileHandle);
+
+  AsciiStrnToUnicodeStrS(
+    AsciiBuffer,
+    AsciiSize,
+    UnicodeBuffer,
+    sizeof(UnicodeBuffer)/sizeof(CHAR16),
+    &UnicodeNum
+  );
+
+  AsciiPrint(AsciiBuffer);  //test
+
+  Print(L"%s - number %d\n", UnicodeBuffer, UnicodeNum);
 
   ShellPrintHelp(
     L"Shell Command Help Test",

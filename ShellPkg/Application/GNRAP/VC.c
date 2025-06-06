@@ -8,10 +8,6 @@
 #include "VC.h"
 #include "MF.h"
 
-/*******************************************************************************
- *	Date		Version		Comment
- *	24/10/09	V0.1.0		Initial Version
- ******************************************************************************/
 #define	VERSION_MAJOR						        0			// Major version
 #define	VERSION_MINOR						        1			// Minor version 1
 #define	VERSION_BUILD						        0			// Build version 
@@ -30,8 +26,10 @@
 
 CHAR16* StrVolCh[5] = { L"P12V-CD", L"P12V-EF", L"P12V-IJ", L"P12V-KL", L"P3.3V" };
 
+/*
 EFI_FILE_PROTOCOL* gRoot = NULL;
 EFI_SIMPLE_FILE_SYSTEM_PROTOCOL* gSimpleFileSystem = NULL;
+*/
 
 /*Function declaration*/
 void
@@ -77,16 +75,10 @@ ShellAppMain (
 {
   EFI_STATUS  Status = EFI_INVALID_PARAMETER;
   CHAR16 OpCmd[SIZE_ARGUMENT_MAX];
-  CHAR16 Date[12];
-  
-  UnicodeSPrintAsciiFormat(
-    &Date[0],
-    sizeof(Date),
-    __DATE__
-    );
 
-  Print(L"Voltage Control Program for PCT3.0 GNRAP MRDIMM V%d.%d.%d %s\n",
-      VERSION_MAJOR, VERSION_MINOR, VERSION_BUILD, Date);
+  
+  Print(L"Voltage Control Program for PCT3.0 GNRAP MRDIMM V%d.%d.%d %a\n",
+      VERSION_MAJOR, VERSION_MINOR, VERSION_BUILD, __DATE__);
     
   if (Argc == 1) {
     PrintHelpMsg();
@@ -385,130 +377,92 @@ ToUpperCase(
   }
 }
 
-EFI_STATUS
-InitFileHandle(
-  void
-)
-{
-  EFI_STATUS Status = EFI_UNSUPPORTED;
-
-  Status = gBS->LocateProtocol(
-    &gEfiSimpleFileSystemProtocolGuid,
-    NULL,
-    (VOID**)&gSimpleFileSystem
-  );
-
-  if (EFI_ERROR(Status)) {
-    Print(L"  Failed to Open File System\n");
-    return Status;
-  }
-
-  Status = gSimpleFileSystem->OpenVolume(
-    gSimpleFileSystem,
-    &gRoot
-  );
-
-  if (EFI_ERROR(Status)) {
-    Print(L"  Failed to Open Root\n");
-    return Status;
-  }
-
-  return Status;
-}
-
+//brnxxx 20250606 + >>>>
 EFI_STATUS
 GetIDFunc(
   void
 )
 {
-  EFI_STATUS Status = EFI_UNSUPPORTED;
-  EFI_FILE_PROTOCOL* VoltFile;
-  EFI_FILE_PROTOCOL* SpcFile;
-
-  CHAR16 VerStr[] = L"VC S/W VERSION=%d.%d.%d\nVC F/W VERSION=%d.%d.%d\n";
-  CHAR16 SlotStr[] = L"Slot%d B\n";
-  VA_LIST Marker;
-  UINTN bufSize;
+  EFI_STATUS Status;
+  SHELL_FILE_HANDLE FileHandle;
+  CHAR8 AsciiBuffer[64];
   UINT8 V1, V2, V3;
+  UINTN AsciiSize;
 
-  Status = InitFileHandle();
-  if (EFI_ERROR(Status)) {
-    Print(L"  Failed to Get File Handle %r\n", Status);
-    return Status;
-  }
-
-  gRoot->Open(
-    gRoot,
-    &VoltFile,
+  Status = ShellOpenFileByName(
     L"VOLTDEV.TXT",
+    &FileHandle,
     EFI_FILE_MODE_CREATE | EFI_FILE_MODE_READ | EFI_FILE_MODE_WRITE,
     0
   );
 
+  if (EFI_ERROR(Status)) {
+    Print(L"Can't Open File VOLTDEV.TXT: %r\n", Status);
+    return Status;
+  }
+
   Status = GetFWVersion(&V1, &V2, &V3);
-
-  VA_START(Marker, VerStr);
-  bufSize = SPrintLength(VerStr, Marker);
-  VA_END(Marker);
-
-  Print(L"STR Buffer Size %d\n", bufSize);  
-  UnicodeSPrint(
-    VerStr,
-    bufSize,
-    L"VC S/W VERSION=%d.%d.%d\n VC F/W VERSION=%d.%d.%d\n",
+  AsciiSPrint(
+    AsciiBuffer,
+    sizeof(AsciiBuffer),
+    "VC SW VERSION=%d.%d.%d\nVC FW VERSION=%d.%d.%d\n",
     VERSION_MAJOR, VERSION_MINOR, VERSION_BUILD,
     V1, V2, V3
   );
 
-  Status = VoltFile->Write(
-    VoltFile,
-    &bufSize,
-    VerStr
+  AsciiSize = AsciiStrLen(AsciiBuffer);
+  Status = ShellWriteFile(
+    FileHandle,
+    &AsciiSize,
+    AsciiBuffer
   );
 
   if (EFI_ERROR(Status)) {
-    Print(L"  Failed to write VOLTDEV.txt\n");
+    Print(L"Can't Write File VOLTDEV.TXT: %r\n", Status);
     return Status;
   }
-  Status = VoltFile->Close(VoltFile);
-  
-  gRoot->Open(
-    gRoot,
-    &SpcFile,
+
+  ShellCloseFile(FileHandle);
+
+  Status = ShellOpenFileByName(
     L"SPCLED.TXT",
+    &FileHandle,
     EFI_FILE_MODE_CREATE | EFI_FILE_MODE_READ | EFI_FILE_MODE_WRITE,
     0
   );
 
+  if (EFI_ERROR(Status)) {
+    Print(L"Can't Open File SPCLED.TXT: %r\n", Status);
+    return Status;
+  }
+
   SetLEDStatus(L"BBBBBBBB");
 
-  VA_START(Marker, SlotStr);
-  bufSize = SPrintLength(SlotStr, Marker);
-  VA_END(Marker);
-  Print(L"SlotStr Buffer Size %d\n", bufSize);
-  
-  for (UINT8 i = 1; i < 9; i++) {    
-    UnicodeSPrint(
-      SlotStr,
-      bufSize,
-      L"Slot%d B\n",
+  for (UINT8 i = 1; i < 9; i++) {
+    AsciiSPrint(
+      AsciiBuffer,
+      sizeof(AsciiBuffer),
+      "Slot%d B\n",
       i
-    );    
+    );
 
-    Status = SpcFile->Write(
-      SpcFile,
-      &bufSize,
-      SlotStr
+    AsciiSize = AsciiStrLen(AsciiBuffer);
+    Status = ShellWriteFile(
+      FileHandle,
+      &AsciiSize,
+      AsciiBuffer
     );
 
     if (EFI_ERROR(Status)) {
-      Print(L"  Failed to write Slot%d SPCLED.txt\n");
+      Print(L"Can't Write File SPCLED.TXT:%d %r\n",i, Status);
       return Status;
     }
   }
 
-  Status = SpcFile->Close(SpcFile);
-  Print(L"  Set CPX_VC -SL BBBBBBBB and Create VOLTDEV.TXT & SPCLED.TXT Ok!\n\n");
+  ShellCloseFile(FileHandle);
 
-  return Status;
+  Print(L"  Set CPX_VC -SL BBBBBBBB and Create VOLTDEV.TXT & SPCLED.TXT Ok!\n\n");
+  
+  return EFI_SUCCESS;
 }
+//brnxxx 20250606 + <<<<

@@ -158,9 +158,9 @@
   ShellPkg/DynamicCommand/VariablePolicyDynamicCommand/VariablePolicyApp.inf
   ShellPkg/Application/ShellTestApp/ShellCTestApp.inf
   ShellPkg/Application/ShellTestApp/ShellFTestApp.inf
- # ShellPkg/Application/GNRAP/VC.inf
- # ShellPkg/Application/GNRAP/IPReader.inf
- # ShellPkg/Application/GNRAP/IDReader.inf
+  ShellPkg/Application/GNRAP/VC.inf
+  ShellPkg/Application/GNRAP/IPReader.inf
+  ShellPkg/Application/GNRAP/IDReader.inf
   
 [BuildOptions]
   *_*_*_CC_FLAGS = -D DISABLE_NEW_DEPRECATED_INTERFACES
