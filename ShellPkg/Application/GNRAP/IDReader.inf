@@ -13,7 +13,7 @@
 
 [Defines]
   INF_VERSION                    = 0x00010005
-  BASE_NAME                      = IDReader
+  BASE_NAME                      = t3
   FILE_GUID                      = e7aa983b-b94c-4531-a000-d362365860ba
   MODULE_TYPE                    = UEFI_APPLICATION
   VERSION_STRING                 = 1.0
@@ -46,7 +46,4 @@
   PrintLib
   BaseMemoryLib
   SerialPortLib
-
-[Protocols]
-  gEfiSimpleFileSystemProtocolGuid 
-
+  FileHandleLib

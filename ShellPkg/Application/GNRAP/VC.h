@@ -3,6 +3,7 @@
 #define VOLATAGE_CONTROL_H_
 
 #include <Uefi.h>
+#include <Library/ShellLib.h>
 #include <Library/BaseLib.h>
 #include <Library/IoLib.h>
 #include <Library/UefiLib.h>
@@ -11,8 +12,6 @@
 #include <Library/ShellCEntryLib.h>
 #include <Library/BaseMemoryLib.h>
 #include <Library/MemoryAllocationLib.h>
-#include <Library/UefiBootServicesTableLib.h>
 
-#include <Protocol/SimpleFileSystem.h>
 
 #endif

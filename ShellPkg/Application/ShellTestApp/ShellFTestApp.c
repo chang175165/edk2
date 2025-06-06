@@ -13,6 +13,8 @@
 #include <Library/PrintLib.h>
 #include <Library/BaseMemoryLib.h>
 #include <Library/ShellCEntryLib.h>
+#include <Library/ShellLib.h>                 //20250605 +
+#include <Library/FileHandle.h>               //20250605 +
 #include <Library/UefiBootServicesTableLib.h>
 #include <Protocol/SimpleFileSystem.h>
 
@@ -53,6 +55,7 @@ ShellAppMain(
   EFI_FILE_PROTOCOL* NewFile = NULL;
   CHAR16 str[] = L"VC S/W VERSION=%d.%d.%d\n VC F/W VERSION=%d.%d.%d\n";
   CHAR16 SlotStr[] = L"Slot%d B\n";
+  SHELL_FILE_HANDLE FileHandle;
   VA_LIST Marker;
   UINTN bufSize;
 
@@ -79,14 +82,15 @@ ShellAppMain(
   }
   Print(L"  Open File Root %r\n", Status);
 
-  if (Argc == 2 && Argv[2] != NULL) {
-    Status = gRoot->Open(
+  if (Argc == 2 && Argv[1] != NULL) {
+      Status = gRoot->Open(
       gRoot,
       &NewFile,
-      Argv[2],
+      pFileName,
       EFI_FILE_MODE_CREATE | EFI_FILE_MODE_READ | EFI_FILE_MODE_WRITE,
       0
     );
+    
   }
   else {
     Status = gRoot->Open(

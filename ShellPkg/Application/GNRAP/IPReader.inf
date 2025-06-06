@@ -13,7 +13,7 @@
 
 [Defines]
   INF_VERSION                    = 0x00010005
-  BASE_NAME                      = IPReader
+  BASE_NAME                      = t2
   FILE_GUID                      = 6be8e735-496c-4ace-b283-fb525b0632d8
   MODULE_TYPE                    = UEFI_APPLICATION
   VERSION_STRING                 = 1.0
@@ -44,7 +44,5 @@
   PrintLib
   BaseMemoryLib
   SerialPortLib
-
-[Protocols]
-  gEfiSimpleFileSystemProtocolGuid
-
+  FileHandleLib
+  MemoryAllocationLib

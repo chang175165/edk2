@@ -9,10 +9,6 @@
 #include "VC.h"
 #include "MF.h"
 
-/*******************************************************************************
- *	Date		  Version		Comment?
- *	24/10/11	V0.1.0		Initial Version
- ******************************************************************************/
 #define VERSION_MAJOR						0
 #define VERSION_MINOR						1
 #define VERSION_BUILD					  0
@@ -20,10 +16,7 @@
 #define MAX_ARGUMENT_STRING     16
 #define SIZE_CMD_ARGS						16
 
-EFI_FILE_PROTOCOL* gRoot = NULL;
-EFI_SIMPLE_FILE_SYSTEM_PROTOCOL* gSimpleFileSystem = NULL;
 
-CHAR16 Date[12];
 CHAR8 AsciiStr[18];
 CHAR16 SNFileName[] = L"EP_R_SN.TXT";
 CHAR16 IDFileName[] = L"EP_R_ID.TXT";
@@ -73,14 +66,8 @@ ShellAppMain (
   CHAR16 OpCmd1[SIZE_CMD_ARGS] = { 0, };
   CHAR16 OpCmd2[SIZE_CMD_ARGS] = { 0, };
     
-  UnicodeSPrintAsciiFormat(
-    &Date[0],
-    sizeof(Date),
-    __DATE__
-  );
-
-  Print(L"IDReader for PCT3.0 GNRAP MRDIMM V%d.%d.%d %s\n",
-      VERSION_MAJOR, VERSION_MINOR, VERSION_BUILD, Date);
+  Print(L"IDReader for PCT3.0 GNRAP MRDIMM V%d.%d.%d %a\n",
+      VERSION_MAJOR, VERSION_MINOR, VERSION_BUILD, __DATE__);
 
   if (Argc == 1 || Argc > 4) {
     PrintHelpMsg();
@@ -110,7 +97,7 @@ ShellAppMain (
     else {
       UINTN size = 0;
       ToUpperCase(Argv[1], OpCmd2);     
-      Status = InitFileHandle();
+  
       if (EFI_ERROR(Status)) {
         return Status;
       }
@@ -124,7 +111,7 @@ ShellAppMain (
         if (!EFI_ERROR(Status)) {
           Status = SaveToFile(SNFileName);
           if (!EFI_ERROR(Status)) {
-            Print(L"  SN : [%s]\n", AsciiStr);            
+            AsciiPrint("  SN : [%s]\n", AsciiStr);            
           }
         }
       }
@@ -136,7 +123,7 @@ ShellAppMain (
         if (!EFI_ERROR(Status)) {
           Status = SaveToFile(IDFileName);
           if (!EFI_ERROR(Status)) {
-            Print(L"  ID : [%s]\n", AsciiStr);            
+            AsciiPrint("  ID : [%s]\n", AsciiStr);            
           }          
         }
       }
@@ -210,62 +197,32 @@ void ToUpperCase(CHAR16* src, CHAR16* dest)
 }
 
 EFI_STATUS
-InitFileHandle(
-  void
-)
-{
-  EFI_STATUS Status = EFI_UNSUPPORTED;
-
-  Status = gBS->LocateProtocol(
-    &gEfiSimpleFileSystemProtocolGuid,
-    NULL,
-    (VOID**)&gSimpleFileSystem
-  );
-
-  if (EFI_ERROR(Status)) {
-    Print(L"  Failed to Open File System %r\n", Status);
-    return Status;
-  }
-
-  Status = gSimpleFileSystem->OpenVolume(
-    gSimpleFileSystem,
-    &gRoot
-  );
-
-  if (EFI_ERROR(Status)) {
-    Print(L"  Failed to Open Root %r\n", Status);
-    return Status;
-  }
-
-  return Status;
-}
-
-EFI_STATUS
 SaveToFile(
   CHAR16* FileStr
 )
 {
   EFI_STATUS Status = EFI_UNSUPPORTED;
-  EFI_FILE_PROTOCOL* InfoFile;
-  UINTN size = AsciiStrLen(AsciiStr);
+  SHELL_FILE_HANDLE FileHandle;
+  UINTN AsciiSize = AsciiStrLen(AsciiStr);
 
-  Status = gRoot->Open(
-      gRoot,
-      &InfoFile,
-      FileStr,
-      EFI_FILE_MODE_CREATE | EFI_FILE_MODE_READ | EFI_FILE_MODE_WRITE,
-      0
-  );
-  if (!EFI_ERROR(Status)) {      
-      Status = InfoFile->Write(
-        InfoFile,
-        &size,
-        AsciiStr
-      );
-      if (!EFI_ERROR(Status)) {
-        Print(L"  %s file create Ok! %r\n\n", FileStr, Status);
-      }
-      InfoFile->Close(InfoFile);
+  Status = ShellOpenFileByName(
+    FileStr,
+    &FileHandle,
+    EFI_FILE_MODE_CREATE | EFI_FILE_MODE_READ | EFI_FILE_MODE_WRITE,
+    0);
+
+  if (!EFI_ERROR(Status)) {
+
+    Status = ShellWriteFile(
+      FileHandle,
+      &AsciiSize,
+      AsciiStr
+    );
+    if (!EFI_ERROR(Status)) {
+      Print(L"  %s file create Ok! %r\n\n", FileStr, Status);
+    }
+
+    ShellCloseFile(&FileHandle);
   }
   else {
     Print(L"  %s file Open error! %r\n\n", FileStr, Status);
