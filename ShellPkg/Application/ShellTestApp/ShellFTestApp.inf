@@ -10,7 +10,7 @@
 
 [Defines]
   INF_VERSION                    = 0x00010006
-  BASE_NAME                      = ShellFTestApp
+  BASE_NAME                      = ftest
   FILE_GUID                      = 7a6ca3b8-ee1b-489c-b300-24544a7bd418
   MODULE_TYPE                    = UEFI_APPLICATION
   VERSION_STRING                 = 1.0
@@ -23,7 +23,8 @@
 #
 
 [Sources]
-  ShellFTestApp.c
+  ##ShellFTestApp.c
+  ftest.c
 
 [Packages]
   MdePkg/MdePkg.dec
@@ -32,10 +33,11 @@
 [LibraryClasses]
   ShellCEntryLib
   UefiLib
-  PrintLib
   BaseMemoryLib 
-  PrintLib
-  
+  ShellLib
+  FileHandleLib
+  BaseLib
+  MemoryAllocationLib
   
 [Protocols]
-  gEfiSimpleFileSystemProtocolGuid
+ 
