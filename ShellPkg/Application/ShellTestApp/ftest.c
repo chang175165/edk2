@@ -51,8 +51,7 @@ ShellAppMain(
   }
 
   FileName = Argv[1];
-  Print(L"Open file : %s\n", FileName);
-
+  
   Status = ShellOpenFileByName(
     FileName,
     &FileHandle,
@@ -67,7 +66,7 @@ ShellAppMain(
   AsciiSPrint(
     AsciiBuffer,
     sizeof(AsciiBuffer),
-    "TEST SW Version=%d.%d.%d\nTest2 FW version=%d.%d.%d\n",
+    "TEST SW Version=%d.%d.%d\nTest2 FW version=%d.%d.%d",
     VERSION_MAJOR, VERSION_MINOR, VERSION_BUILD,
     V1,V2,V3
   );
@@ -86,9 +85,6 @@ ShellAppMain(
   }
 
   ShellCloseFile(&FileHandle);
-
-  Print(L"Close files \n");
-  AsciiPrint(AsciiBuffer);  //test
 
   return EFI_SUCCESS;
 
