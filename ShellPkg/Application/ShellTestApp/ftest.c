@@ -42,11 +42,9 @@ ShellAppMain(
   EFI_STATUS  Status;
   SHELL_FILE_HANDLE FileHandle;
   CHAR16* FileName;
-  CHAR8 AsciiBuffer[128];
-  CHAR16 UnicodeBuffer[128];
+  CHAR8 AsciiBuffer[64];
   UINTN AsciiSize;
-  UINTN UnicodeNum;
-
+  
   if (Argc < 2) {
     Print(L"Use ftest.efi file name\n");
     return EFI_INVALID_PARAMETER;
@@ -69,7 +67,7 @@ ShellAppMain(
   AsciiSPrint(
     AsciiBuffer,
     sizeof(AsciiBuffer),
-    "TEST SW Version=%d.%d.%d\n Test2 FW version=%d.%d.%d\n",
+    "TEST SW Version=%d.%d.%d\nTest2 FW version=%d.%d.%d\n",
     VERSION_MAJOR, VERSION_MINOR, VERSION_BUILD,
     V1,V2,V3
   );
@@ -89,22 +87,8 @@ ShellAppMain(
 
   ShellCloseFile(&FileHandle);
 
-  AsciiStrnToUnicodeStrS(
-    AsciiBuffer,
-    AsciiSize,
-    UnicodeBuffer,
-    sizeof(UnicodeBuffer)/sizeof(CHAR16),
-    &UnicodeNum
-  );
-
+  Print(L"Close files \n");
   AsciiPrint(AsciiBuffer);  //test
-
-  Print(L"%s - number %d\n", UnicodeBuffer, UnicodeNum);
-
-  ShellPrintHelp(
-    L"Shell Command Help Test",
-    L"Shell Section Test",
-    TRUE);
 
   return EFI_SUCCESS;
 
