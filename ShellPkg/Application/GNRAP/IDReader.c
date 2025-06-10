@@ -65,9 +65,9 @@ ShellAppMain (
   EFI_STATUS  Status = EFI_INVALID_PARAMETER;
   CHAR16 OpCmd1[SIZE_CMD_ARGS] = { 0, };
   CHAR16 OpCmd2[SIZE_CMD_ARGS] = { 0, };
-    
-  Print(L"IDReader for PCT3.0 GNRAP MRDIMM V%d.%d.%d %a\n",
-      VERSION_MAJOR, VERSION_MINOR, VERSION_BUILD, __DATE__);
+
+  Print(L"IDReader for PCT3.0 MRDIMM Tester V%d.%d.%d %a\n",
+    VERSION_MAJOR, VERSION_MINOR, VERSION_BUILD, __DATE__);
 
   if (Argc == 1 || Argc > 4) {
     PrintHelpMsg();
@@ -175,13 +175,14 @@ ShellAppMain (
 
 void PrintHelpMsg(void)
 {
-  Print(L"Copyright (c) 1996 - 2024, Meritech Corporation. All rights reserved \n");
+  Print(L"Copyright (c) 1996 - 2025, Meritech Corporation. All rights reserved \n");
   Print(L"  usage : IDREADER [-R/W] [-SN/-ID] <ID String>\n");
   Print(L"          IDREADER -CC     (Check connection)\n");
   Print(L"          IDREADER -R -SN  (Read Bd ID -> EP_R_ID.TXT)\n");
   Print(L"          IDREADER -R -ID  (Read Bd SN -> EP_R_SN.TXT)\n");
   Print(L"          IDREADER -W -SN  Serial Number (Write Bd SN )\n");
   Print(L"          IDREADER -W -ID  ID            (Write Bd ID )\n");
+  Print(L"  Author by Brian Cheng in TDC\n");
 }
 
 void ToUpperCase(CHAR16* src, CHAR16* dest)

@@ -76,8 +76,7 @@ ShellAppMain (
   EFI_STATUS  Status = EFI_INVALID_PARAMETER;
   CHAR16 OpCmd[SIZE_ARGUMENT_MAX];
 
-  
-  Print(L"Voltage Control Program for PCT3.0 GNRAP MRDIMM V%d.%d.%d %a\n",
+  Print(L"Voltage Control Program for PCT3.0 MRDIMM Tester V%d.%d.%d %a\n",
       VERSION_MAJOR, VERSION_MINOR, VERSION_BUILD, __DATE__);
     
   if (Argc == 1) {
@@ -336,7 +335,7 @@ PrintHelpMsg(
   void
 )
 {
-  Print(L"Copyright (c) 1996 - 2024, Meritech Corporation. All rights reserved \n");
+  Print(L"Copyright (c) 1996 - 2025, Meritech Corporation. All rights reserved \n");
   Print(L"  Usage : VC [command] [ch] [mVolt]\n");
   Print(L"  Examples:\n");
   Print(L"    VC -CC                     (Check Connection)\n");
@@ -350,7 +349,7 @@ PrintHelpMsg(
   Print(L"    VC -SC [M-ACTION]          (Set Memory Slot Count Action)\n");
   Print(L"    VC -SV [V-CH] [VOLTAGE]    (Set output Voltage)\n");
   Print(L"    VC -BV [V-CH] [VOLTAGE]    (Set Boot Voltage)\n");
-  Print(L"    VC -FS [FAN] [FAN_SPEED]   (Set FAN Speed Control)\n");
+  //Print(L"    VC -FS [FAN] [FAN_SPEED]   (Set FAN Speed Control)\n");
   Print(L"  V-CH : 1 = P12V-CD, 2 = P12V-EF, 3 = P12V-IJ, 4 = P12V-KL, 5 = P3.3V\n");
   Print(L"  Voltage range : %d mv <= P12V <= %d mV\n", MIN_VDD, MAX_VDD);
   Print(L"                  %d mV <= 3.3V <= %d mV\n", MIN_P3_3V, MAX_P3_3V);
@@ -359,6 +358,7 @@ PrintHelpMsg(
   Print(L"  FAN_NUM : 1=CPU FAN 1/2, 2=CPU FAN 3/4, 3=SYS_FAN 1, 4=SYS_FAN 2\n");
   Print(L"  FAN : 1 = CPU FAN1, FAN2, 2 = CPU FAN 3, FAN4, 3 = CPU FAN1 ~ FAN4\n");
   Print(L"  FAN_SPEED : 3 ~ 10\n");
+  Print(L"  Author by Brian Cheng in TDC\n");
 }
 
 void

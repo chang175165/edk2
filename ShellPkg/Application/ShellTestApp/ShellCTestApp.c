@@ -111,16 +111,14 @@ ShellAppMain(
     return Status;
   }
 
-  if (Argc == 2 && Argv[2] != NULL) {
-    if (StrCmp(Argv[2], L"1") == 0) {
+  if (Argc >= 2 && Argv[1] != NULL) {
+    if (StrCmp(Argv[1], L"1") == 0) {
       sendUartBuffer(UartTest, NumBytes);
       IoWrite8(0x80, 0xEE);
     }
     else {
 
-       P80Num = StrHexToUintn(Argv[2]);
-      //UartTest[2] = (UINT8)P80Num & 0x0F;
-      //UartTest[3] = ((UINT8)P80Num >> 4) & 0x0F;
+      P80Num = StrHexToUintn(Argv[1]);
       UartTest[2] = (UINT8)P80Num;
       RetBytes = SerialPortWrite(UartTest, NumBytes);
 
