@@ -176,12 +176,12 @@ ShellAppMain (
 void PrintHelpMsg(void)
 {
   Print(L"Copyright (c) 1996 - 2025, Meritech Corporation. All rights reserved \n");
-  Print(L"  usage : IDREADER [-R/W] [-SN/-ID] <ID String>\n");
-  Print(L"          IDREADER -CC     (Check connection)\n");
-  Print(L"          IDREADER -R -SN  (Read Bd ID -> EP_R_ID.TXT)\n");
-  Print(L"          IDREADER -R -ID  (Read Bd SN -> EP_R_SN.TXT)\n");
-  Print(L"          IDREADER -W -SN  Serial Number (Write Bd SN )\n");
-  Print(L"          IDREADER -W -ID  ID            (Write Bd ID )\n");
+  Print(L"  usage : IDReader [-R/W] [-SN/-ID] <ID String>\n");
+  Print(L"          IDReader -CC     (Check connection)\n");
+  Print(L"          IDReader -R -SN  (Read Bd ID -> EP_R_ID.TXT)\n");
+  Print(L"          IDReader -R -ID  (Read Bd SN -> EP_R_SN.TXT)\n");
+  Print(L"          IDReader -W -SN  Serial Number (Write Bd SN )\n");
+  Print(L"          IDReader -W -ID  ID            (Write Bd ID )\n");
   Print(L"  Author by Brian Cheng in TDC\n");
 }
 
