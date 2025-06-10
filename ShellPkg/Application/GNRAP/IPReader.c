@@ -60,14 +60,14 @@ ShellAppMain (
 {
   EFI_STATUS  Status = EFI_UNSUPPORTED;
   CHAR16 OpCmd[MAX_ARGUMENT_STRING] = { 0, };
-  
-   if (Argc == 1 || Argc > 3) {
+
+  Print(L"IPReader for PCT3.0 MRDIMM Tester V%d.%d.%d %a\n",
+    VERSION_MAJOR, VERSION_MINOR, VERSION_BUILD, __DATE__);
+
+  if (Argc == 1 || Argc > 3) {
     PrintHelpMsg();
     return Status;
   }
-
-  Print(L"IPReader for PCT3.0 GNRAP MRDIMM V%d.%d.%d %a\n",
-    VERSION_MAJOR, VERSION_MINOR, VERSION_BUILD, __DATE__);
 
   Status = InitSerialPort();
   if (EFI_ERROR(Status)) {
@@ -117,11 +117,12 @@ ShellAppMain (
 
 void PrintHelpMsg(void)
 {
-  Print(L"Copyright (c) 1996 - 2024, Meritech Corporation. All rights reserved \n");
+  Print(L"Copyright (c) 1996 - 2025, Meritech Corporation. All rights reserved \n");
   Print(L"  usage : IPReader [-R/-W] [address]\n");
   Print(L"  examples:\n");
   Print(L"    IPReader -W address     (Write BOARD IP)\n");
   Print(L"    IPReader -R             (Read BOARD IP)\n");
+  Print(L"  Author by Brian Cheng in TDC\n");
 }
 
 void ToUpperCase(CHAR16* src, CHAR16* dest)
