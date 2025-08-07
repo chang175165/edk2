@@ -1,0 +1,37 @@
+##  @file
+#  EFI application that displays and verifies ACPI tables
+#
+#  Copyright (c) 2020, ARM Limited. All rights reserved.<BR>
+#
+#  SPDX-License-Identifier: BSD-2-Clause-Patent
+#
+#
+##
+
+[Defines]
+  INF_VERSION                    = 0x0001001B
+  BASE_NAME                      = DimmViewApp
+  FILE_GUID                      = 46361B5B-AF17-41FF-95F9-E1BCE08435BA
+  MODULE_TYPE                    = UEFI_APPLICATION
+  VERSION_STRING                 = 1.0
+  ENTRY_POINT                    = ShellCEntryLib
+  UEFI_HII_RESOURCE_SECTION      = TRUE
+
+[Sources.common]
+  DimmView.c
+  DimmView.h
+  CpuIds.h
+  CpuIds.c
+
+[Packages]
+  MdeModulePkg/MdeModulePkg.dec
+  MdePkg/MdePkg.dec
+  ShellPkg/ShellPkg.dec
+
+[LibraryClasses]
+  ShellCEntryLib
+  UefiLib
+  BaseLib
+  PrintLib
+  CpuLib
+

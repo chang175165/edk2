@@ -161,6 +161,7 @@
   ShellPkg/Application/GNRAP/VC.inf
   ShellPkg/Application/GNRAP/IPReader.inf
   ShellPkg/Application/GNRAP/IDReader.inf
+  ShellPkg/Application/ShellDimmInfo/DimmView.inf
   
 [BuildOptions]
   *_*_*_CC_FLAGS = -D DISABLE_NEW_DEPRECATED_INTERFACES
