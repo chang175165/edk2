@@ -6,10 +6,10 @@
 
 UINT32  PciExpressBaseAddress;
 UINT32  ScfBaseAddress;
-//UINT32  I3cSpdBus0BaseAddress;
-//UINT32  I3cSpdBus1BaseAddress;
-//UINT32  I3cSpdBus2BaseAddress;
-//UINT32  I3cSpdBus3BaseAddress;
+//UINT32  I3cSpdBus0BaseAddress;  //ABC IMC0~2
+//UINT32  I3cSpdBus1BaseAddress;  //GHI IMC6~8
+//UINT32  I3cSpdBus2BaseAddress;  //DEF IMC3~5
+//UINT32  I3cSpdBus3BaseAddress;  //JKL IMC8~11
 UINT32  I3cSpdBusBaseAddress[4];
 
 EFI_STATUS

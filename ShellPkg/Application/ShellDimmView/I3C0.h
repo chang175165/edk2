@@ -3,6 +3,35 @@
 #ifndef _I3C0_REGS_H_
 #define _I3C0_REGS_H_
 
+// Clock Period values (for SMBUS freq) are based on 100 MHz FXCLK
+#define SMB_100K_CLK_PERIOD    1000  // Clock period to be programmed for 100 kHz
+#define SMB_100K_CLK_OFFSET    35    // Clock offset to be programmed for 100 kHz
+#define SMB_400K_CLK_PERIOD    250   // Clock period to be programmed for 400 kHz
+#define SMB_400K_CLK_OFFSET    35    // Clock offset to be programmed for 400 kHz
+#define SMB_700K_CLK_PERIOD    144   // Clock period to be programmed for 700 kHz
+#define SMB_700K_CLK_OFFSET    30    // Clock offset to be programmed for 700 kHz
+#define SMB_1M_CLK_PERIOD      100   // Clock period to be programmed for 1 MHz
+#define SMB_1M_CLK_OFFSET      19    // Clock offset to be programmed for 1 MHz
+
+#define SMB_100K_CLK_PERIOD_L  750   // Low count of Clock period to be programmed for 100 kHz
+#define SMB_100K_CLK_PERIOD_H  250   // High count of Clock period to be programmed for 100 kHz
+#define SMB_200K_CLK_PERIOD    500   // Clock period to be programmed for 200 kHz
+#define SMB_4M_CLK_PERIOD      25    // Clock period to be programmed for 4 MHz
+#define SMB_6M_CLK_PERIOD      16    // Clock period to be programmed for 6 MHz ~ 6.25
+#define SMB_8M_CLK_PERIOD      12    // Clock period to be programmed for 8 MHz ~ 8.3
+#define SMB_9M_CLK_PERIOD      11    // Clock period to be programmed for 9 MHz ~ 9.09
+#define SMB_10M_CLK_PERIOD     10    // Clock period to be programmed for 10 MHz
+
+// For Birchstream (BHS) platform:
+// AP 3 DIMMs (PP) - Frequency = 9.09 MHz, Duty_Cycle = 45.45 % (5 hcnt - 6 lcnt),     SDA_Tx_HOLD = 0x3 (30 ns)
+// AP 3 DIMMs (OD) - Frequency = 1 MHz,    Duty_Cycle = 40 %    (40 hcnt - 60 lcnt),   SDA_Tx_HOLD = 0x3 (30 ns)
+// SP 8 DIMMs (PP) - Frequency = 8.33 MHz, Duty_Cycle = 41.67 % (5 hcnt - 7 lcnt),     SDA_Tx_HOLD = 0x3 (30 ns)
+// SP 8 DIMMs (OD) - Frequency = 1 MHz,    Duty_Cycle = 40 %    (40 hcnt - 60 lcnt),   SDA_Tx_HOLD = 0x3 (30 ns)
+//
+#define I3C_DUTY_CYCLE_PUSH_PULL   45 // will round to 45.45% at 9MHz; 41.67 using 8MHz
+#define I3C_DUTY_CYCLE_OPEN_DRAIN  40
+#define I3C_SDA_TX_HOLD             3
+
 #define I3C_HCI_VERSION               0x52
 
 #define DEVICE_CONTROL_I3C0_REG       0x004
@@ -66,6 +95,152 @@ typedef union {
   UINT32 Data;
 } DEVICE_CONTROL_I3C0_STRUCT;
 
+
+#define INTR_STATUS_I3C0_REG          0x020
+
+typedef union {
+  struct {
+    UINT32 tx_thld_stat : 1; /**< TX_THLD_STAT */
+
+                            /* Bits[0:0], Access Type=RO, default=0x00000000*/
+
+                            /* --- */
+
+    UINT32 rx_thld_stat : 1; /**< RX_THLD_STAT */
+
+                            /* Bits[1:1], Access Type=RO, default=0x00000000*/
+
+                            /* --- */
+
+    UINT32 ibi_status_thld_stat : 1; /**< IBI_STATUS_THLD_STAT */
+
+                            /* Bits[2:2], Access Type=RO, default=0x00000000*/
+
+                            /* --- */
+
+    UINT32 cmd_queue_ready_stat : 1; /**< CMD_QUEUE_READY_STAT */
+
+                            /* Bits[3:3], Access Type=RO, default=0x00000000*/
+
+                            /* --- */
+
+    UINT32 resp_ready_stat : 1; /**< RESP_READY_STAT */
+
+                            /* Bits[4:4], Access Type=RO, default=0x00000000*/
+
+                            /* --- */
+
+    UINT32 transfer_abort_stat : 1; /**< TRANSFER_ABORT_STAT */
+
+                            /* Bits[5:5], Access Type=RW/1C, default=0x00000000*/
+
+                            /* --- */
+
+    UINT32 reserved_6_8 : 3; /**< RESERVED_6_8 */
+
+                            /* Bits[8:6], Access Type=RO, default=0x00000000*/
+
+                            /* --- */
+
+    UINT32 transfer_err_stat : 1; /**< TRANSFER_ERR_STAT */
+
+                            /* Bits[9:9], Access Type=RW/1C, default=0x00000000*/
+
+                            /* --- */
+
+    UINT32 hc_internal_err_stat : 1; /**< HC_INTERNAL_ERR_STAT */
+
+                            /* Bits[10:10], Access Type=RW/1C, default=0x00000000*/
+
+                            /* --- */
+
+    UINT32 reserved_11_13 : 3; /**< RESERVED_11_13 */
+
+                            /* Bits[13:11], Access Type=RO, default=0x00000000*/
+
+                            /* --- */
+
+    UINT32 ppoll_cmd_miss_stat : 1; /**< PPOLL_CMD_MISS_STAT */
+
+                            /* Bits[14:14], Access Type=RW/1C, default=0x00000000*/
+
+                            /* --- */
+
+    UINT32 bus_reset_done_stat : 1; /**< BUS_RESET_DONE_STAT */
+
+                            /* Bits[15:15], Access Type=RW/1C, default=0x00000000*/
+
+                            /* --- */
+
+    UINT32 reserved_16_31 : 16; /**< RESERVED_16_31 */
+
+                            /* Bits[31:16], Access Type=RO, default=0x00000000*/
+
+                            /* --- */
+
+  }     Bits;
+  UINT32 Data;
+} INTR_STATUS_I3C0_STRUCT;
+
+#define COMMAND_QUEUE_PORT_I3C0_REG   0x0C0
+
+typedef union {
+  struct {
+    UINT32 command : 32; /**< COMMAND */
+
+                            /* Bits[31:0], Access Type=WO, default=0x00000000*/
+
+                            /* --- */
+
+  }     Bits;
+  UINT32 Data;
+} COMMAND_QUEUE_PORT_I3C0_STRUCT;
+
+#define RESPONSE_QUEUE_PORT_I3C0_REG  0x0C4
+
+typedef union {
+  struct {
+    UINT32 data_length : 16; /**< DATA_LENGTH */
+
+                            /* Bits[15:0], Access Type=RO, default=0x00000000*/
+
+                            /* --- */
+
+    UINT32 reserved_16_23 : 8; /**< RESERVED_16_23 */
+
+                            /* Bits[23:16], Access Type=RO, default=0x00000000*/
+
+                            /* --- */
+
+    UINT32 tid : 4; /**< TID */
+
+                            /* Bits[27:24], Access Type=RO, default=0x00000000*/
+
+                            /* --- */
+
+    UINT32 err_status : 4; /**< ERR_STATUS */
+
+                            /* Bits[31:28], Access Type=RO, default=0x00000000*/
+
+                            /* --- */
+
+  }     Bits;
+  UINT32 Data;
+} RESPONSE_QUEUE_PORT_I3C0_STRUCT;
+
+#define TX_DATA_PORT_I3C0_REG         0x0C8
+
+typedef union {
+  struct {
+    UINT32 tx_data_port : 32; /**< TX_DATA_PORT */
+
+                            /* Bits[31:0], Access Type=WO, default=0x00000000*/
+
+                            /* --- */
+
+  }     Bits;
+  UINT32 Data;
+} TX_DATA_PORT_I3C0_STRUCT;
 
 #define SCL_I3C_OD_TIMING_I3C0_REG    0x214
 
@@ -157,5 +332,6 @@ typedef union {
   }     Bits;
   UINT32 Data;
 } SCL_I2C_FM_TIMING_I3C0_STRUCT;
+
 
 #endif _I3C0_REGS_H_
