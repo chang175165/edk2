@@ -7,6 +7,7 @@
 #include <Library/BaseLib.h>
 #include <Library/UefiLib.h>
 #include <Library/CpuLib.h>
+#include <Library/IoLib.h>
 #include <Library/PrintLib.h>
 #include <Library/ShellCEntryLib.h>
 
@@ -16,7 +17,7 @@ PopulateCpuType(
 );
 
 EFI_STATUS
-IntiI3CMmioBase(
+InitI3CDevices(
   void
 );
 

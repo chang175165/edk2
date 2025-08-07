@@ -32,7 +32,7 @@ ShellAppMain(
 {
   EFI_STATUS Status;
   Status = PopulateCpuType();
-
+  Status = InitI3CDevices();
 
   return EFI_SUCCESS;
 

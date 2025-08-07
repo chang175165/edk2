@@ -15,7 +15,7 @@ GetCpuBrandName()
   UINT32                  RegEdx;
   UINTN                   Index = 0;
   UINT8*                  RawBytes;
-  CHAR16                  CpuBrand[14] = {0};
+  CHAR16                  CpuBrand[14];
 
   AsmCpuid(CPUID_SIGNATURE, NULL, &RegEbx, &RegEcx, &RegEdx);
 
@@ -29,7 +29,7 @@ GetCpuBrandName()
     CpuBrand[Index++] = (CHAR16)RawBytes[i];
   }
 
-  Index++;  //Space
+  CpuBrand[Index++] = 0x0020;  //Space
   CpuBrand[Index++] = (CHAR16)RawBytes[3];
 
   RawBytes = (UINT8*)&RegEcx;

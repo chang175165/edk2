@@ -36,4 +36,7 @@
   BaseLib
   PrintLib
   CpuLib
+  IoLib
+  PciLib
+  PciExpressLib
 

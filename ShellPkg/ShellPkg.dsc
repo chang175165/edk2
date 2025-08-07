@@ -58,6 +58,9 @@
   BcfgCommandLib|ShellPkg/Library/UefiShellBcfgCommandLib/UefiShellBcfgCommandLib.inf
   AcpiViewCommandLib|ShellPkg/Library/UefiShellAcpiViewCommandLib/UefiShellAcpiViewCommandLib.inf
   IoLib|MdePkg/Library/BaseIoLibIntrinsic/BaseIoLibIntrinsic.inf
+  PciCf8Lib|MdePkg/Library/BasePciCf8Lib/BasePciCf8Lib.inf              #brnxxxx 250807
+  PciLib|MdePkg/Library/BasePciLibCf8/BasePciLibCf8.inf                 #brnxxxx 250807
+  PciExpressLib|MdePkg/Library/BasePciExpressLib/BasePciExpressLib.inf  #brnxxxx 250807
 
   UefiBootManagerLib|MdeModulePkg/Library/UefiBootManagerLib/UefiBootManagerLib.inf
   HobLib|MdePkg/Library/DxeHobLib/DxeHobLib.inf
