@@ -1,5 +1,4 @@
 
-
 #ifndef _CPUID_REGS_H_
 #define _CPUID_REGS_H_
 
