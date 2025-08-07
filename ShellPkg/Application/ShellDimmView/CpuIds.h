@@ -87,9 +87,5 @@
 BOOLEAN IsIntelCpu = FALSE;
 BOOLEAN IsAmdCpu = FALSE;
 
-EFI_STATUS
-PopulateCpuType(
-  void
-);
 
 #endif _CPUID_REGS_H_

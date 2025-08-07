@@ -22,6 +22,8 @@
   DimmView.h
   CpuIds.h
   CpuIds.c
+  RACU.c
+  RACU.h
 
 [Packages]
   MdeModulePkg/MdeModulePkg.dec

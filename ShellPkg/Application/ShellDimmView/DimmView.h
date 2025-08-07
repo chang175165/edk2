@@ -10,6 +10,15 @@
 #include <Library/PrintLib.h>
 #include <Library/ShellCEntryLib.h>
 
+EFI_STATUS
+PopulateCpuType(
+  void
+);
+
+EFI_STATUS
+IntiI3CMmioBase(
+  void
+);
 
 
 

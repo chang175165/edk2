@@ -15,7 +15,7 @@ GetCpuBrandName()
   UINT32                  RegEdx;
   UINTN                   Index = 0;
   UINT8*                  RawBytes;
-  CHAR16                  CpuBrand[13];
+  CHAR16                  CpuBrand[14] = {0};
 
   AsmCpuid(CPUID_SIGNATURE, NULL, &RegEbx, &RegEcx, &RegEdx);
 
@@ -25,9 +25,12 @@ GetCpuBrandName()
   }
 
   RawBytes = (UINT8*)&RegEdx;
-  for (int i = 0; i < 4; i++) {
+  for (int i = 0; i < 3; i++) {
     CpuBrand[Index++] = (CHAR16)RawBytes[i];
   }
+
+  Index++;  //Space
+  CpuBrand[Index++] = (CHAR16)RawBytes[3];
 
   RawBytes = (UINT8*)&RegEcx;
   for (int i = 0; i < 4; i++) {
@@ -56,36 +59,11 @@ PopulateCpuType(
     IsAmdCpu = TRUE;
   }
   else {
-    switch (CpuFamily>>4) {
-    case CPU_FAMILY_GNRSP:
-      CpuType = CPU_GNRSP;
-      break;
-
-    case CPU_FAMILY_GNRD:
-      CpuType = CPU_GNRD;
-      break;
-
-    case CPU_FAMILY_SRFSP:
-      CpuType = CPU_SRFSP;
-      break;
-
-    case CPU_FAMILY_CWF:
-      CpuType = CPU_CWF;
-      break;
-
-    case CPU_FAMILY_GRR:
-      CpuType = CPU_GRR;
-      break;
-
-    default:
-      Print(L"Unknown CPU family 0x%x\n", CpuFamily);
-      return EFI_DEVICE_ERROR;
-    }
     IsIntelCpu = TRUE;
   }
 
-  Print(L"CPU family 0x%08x, Stepping 0x%02x and Type 0x%02x\n",
-    CpuFamily, CpuStepping, CpuType);
+  Print(L"CPU family 0x%08x, Stepping 0x%02x\n",
+    CpuFamily, CpuStepping);
 
   return EFI_SUCCESS;
 }
