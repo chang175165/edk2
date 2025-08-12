@@ -95,6 +95,69 @@ typedef union {
   UINT32 Data;
 } DEVICE_CONTROL_I3C0_STRUCT;
 
+/** DEVICE_CAPABILITIES_SB_I3C0 desc:
+  * Register default value:        0x00000004
+  * Register full path in IP: sb_i3c_top_regs/sb_i3c_0/sb_i3c_ctrl_sb_i3c_ctrl_prim/DEVICE_CAPABILITIES
+  * Security PolicyGroup: SB_I3C_MMIO_REGS_GP
+  * DEVICE_CAPABILITIES
+  */
+
+#define DEVICE_CAPABILITIES_SB_I3C0_REG  0x00C
+
+typedef union {
+  struct {
+    UINT32 reserved_0_1 : 2; /**< RESERVED_0_1 */
+
+                            /* Bits[1:0], Access Type=RO, default=0x00000000*/
+
+                            /* --- */
+
+    UINT32 combo_command : 1; /**< COMBO_COMMAND */
+
+                            /* Bits[2:2], Access Type=RO, default=0x00000001*/
+
+                            /* --- */
+
+    UINT32 auto_command : 1; /**< AUTO_COMMAND */
+
+                            /* Bits[3:3], Access Type=RO, default=0x00000000*/
+
+                            /* --- */
+
+    UINT32 sg_for_ring_ptrs : 1; /**< SG_FOR_RING_PTRS */
+
+                            /* Bits[4:4], Access Type=RO, default=0x00000000*/
+
+                            /* --- */
+
+    UINT32 non_current_master_cap : 1; /**< NON_CURRENT_MASTER_CAP */
+
+                            /* Bits[5:5], Access Type=RO, default=0x00000000*/
+
+                            /* --- */
+
+    UINT32 hdr_ddr_en : 1; /**< HDR_DDR_EN */
+
+                            /* Bits[6:6], Access Type=RO, default=0x00000001*/
+
+                            /* --- */
+
+    UINT32 hdr_ts_en : 1; /**< HDR_TS_EN */
+
+                            /* Bits[7:7], Access Type=RO, default=0x00000001*/
+
+                            /* --- */
+
+    UINT32 reserved_8_31 : 24; /**< RESERVED_8_31 */
+
+                            /* Bits[31:8], Access Type=RO, default=0x00000000*/
+
+                            /* --- */
+
+  }     Bits;
+  UINT32 Data;
+} DEVICE_CAPABILITIES_I3C0_STRUCT;
+
 
 #define INTR_STATUS_I3C0_REG          0x020
 
@@ -228,7 +291,7 @@ typedef union {
   UINT32 Data;
 } RESPONSE_QUEUE_PORT_I3C0_STRUCT;
 
-#define TX_DATA_PORT_I3C0_REG         0x0C8
+#define DATA_PORT_I3C0_REG         0x0C8
 
 typedef union {
   struct {
@@ -240,7 +303,75 @@ typedef union {
 
   }     Bits;
   UINT32 Data;
-} TX_DATA_PORT_I3C0_STRUCT;
+} DATA_PORT_I3C0_STRUCT;
+
+#define DATA_PORT_SB_I3C0_WIDTH 32
+
+#define DATA_PORT_SB_I3C0_DATA_PORT_LSB 0x0000
+#define DATA_PORT_SB_I3C0_DATA_PORT_SIZE 0x0020
+
+/** DATA_BUFFER_THLD_CTRL_SB_I3C0 desc:
+  * Register default value:        0x01010404
+  * Register full path in IP: sb_i3c_top_regs/sb_i3c_0/sb_i3c_ctrl_sb_i3c_ctrl_prim/DATA_BUFFER_THLD_CTRL
+  * Security PolicyGroup: SB_I3C_MMIO_REGS_GP
+  * DATA_BUFFER_THLD_CTRL
+  */
+
+#define DATA_BUFFER_THLD_CTRL_I3C0_REG 0x0d4
+
+typedef union {
+  struct {
+    UINT32 tx_buf_thld : 3; /**< TX_BUF_THLD */
+
+                            /* Bits[2:0], Access Type=RW, default=0x00000004*/
+
+                            /* --- */
+
+    UINT32 reserved_3_7 : 5; /**< RESERVED_3_7 */
+
+                            /* Bits[7:3], Access Type=RO, default=0x00000000*/
+
+                            /* --- */
+
+    UINT32 rx_buf_thld : 3; /**< RX_BUF_THLD */
+
+                            /* Bits[10:8], Access Type=RW, default=0x00000004*/
+
+                            /* --- */
+
+    UINT32 reserved_11_15 : 5; /**< RESERVED_11_15 */
+
+                            /* Bits[15:11], Access Type=RO, default=0x00000000*/
+
+                            /* --- */
+
+    UINT32 tx_start_thld : 3; /**< TX_START_THLD */
+
+                            /* Bits[18:16], Access Type=RW, default=0x00000001*/
+
+                            /* --- */
+
+    UINT32 reserved_19_23 : 5; /**< RESERVED_19_23 */
+
+                            /* Bits[23:19], Access Type=RO, default=0x00000000*/
+
+                            /* --- */
+
+    UINT32 rx_start_thld : 3; /**< RX_START_THLD */
+
+                            /* Bits[26:24], Access Type=RW, default=0x00000001*/
+
+                            /* --- */
+
+    UINT32 reserved_27_31 : 5; /**< RESERVED_27_31 */
+
+                            /* Bits[31:27], Access Type=RO, default=0x00000000*/
+
+                            /* --- */
+
+  }     Bits;
+  UINT32 Data;
+} DATA_BUFFER_THLD_CTRL_I3C0_STRUCT;
 
 #define SCL_I3C_OD_TIMING_I3C0_REG    0x214
 

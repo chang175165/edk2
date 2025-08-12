@@ -39,4 +39,5 @@
   IoLib
   PciLib
   PciExpressLib
-
+  ShellLib
+  UefiBootServicesTableLib
