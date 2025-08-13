@@ -1,9 +1,10 @@
 
 
 #include "DimmView.h"
-#include "RACU.h"
-#include "I3C0.h"
+#include "Spd.h"
 #include "I3cAccess.h"
+#include "I3C0.h"
+#include "RACU.h"
 
 BOOLEAN InitI3cDone;
 
@@ -15,13 +16,16 @@ UINT32  ScfBaseAddress;
 //UINT32  I3cSpdBus3BaseAddress;  //JKL IMC8~11
 UINT32  I3cSpdBusBaseAddress[4];
 UINT8   I3cDevStatus;
+UINT8   StrapAddress[3] = { 0, 2, 4 };
+UINT16  PpCmdEnblReg[4];
+
+
 
 VOID
 SelectI3cPpFreq(
   UINT32 clk
 )
 {
-
   Print(L"I3C Push Pull: ");
   switch (clk) {
   case SMB_4M_CLK_PERIOD:
@@ -204,7 +208,7 @@ CheckResponseStatus(
 
 EFI_STATUS
 WaitForWriteToCompleteTarget(
-  INT32 I3cInstanceAddress
+  UINT32 I3cInstanceAddress
 )
 {
   UINT32                      Timeout;
@@ -276,6 +280,33 @@ WaitForHostNotBusyTarget (
 
   return Status;
 
+}
+
+EFI_STATUS
+WaitForDataReadyRead(
+  UINT32 I3cInstanceAddress
+)
+{
+  UINT32                      Timeout;
+  INTR_STATUS_I3C0_STRUCT     I3cStatus;
+  EFI_STATUS                  Status = EFI_DEVICE_ERROR;
+
+  Timeout = 100;
+  do {
+    I3cStatus.Data = MmioRead32(I3cInstanceAddress + INTR_STATUS_I3C0_REG);
+
+    //MicroSecondDelay(1);
+    gBS->Stall(1);
+    Timeout--;
+
+    if (Timeout <= 0) {
+      Status = EFI_TIMEOUT;
+      break;
+    }
+
+  } while ((I3cStatus.Bits.rx_thld_stat == 0) && (I3cStatus.Bits.transfer_err_stat == 0));
+
+  return Status;
 }
 
 EFI_STATUS
@@ -352,7 +383,6 @@ SendCccCmd(
 
   RegularCommandLow.Bits.tid = TransactionID;
   RegularCommandLow.Bits.i2cni3c = I3C_DEVICE;
-  //RegularCommandLow.Bits.i2cni3c = I2C_DEVICE;
   if (CmdPresent == CP_CCC_HDR) {
     RegularCommandLow.Bits.cmd = CccCommand;
   }
@@ -373,11 +403,9 @@ SendCccCmd(
 
     return EFI_DEVICE_ERROR;
   }
-
   MmioWrite32(I3cInstanceAddress + COMMAND_QUEUE_PORT_I3C0_REG, CmdPort.Bits.command);
 
   CmdPort.Bits.command = RegularCommandHigh.Data;
-
   Status = WaitForHostNotBusyTarget(I3cInstanceAddress);
   if (EFI_ERROR(Status)) {
 
@@ -408,7 +436,13 @@ SpdEnumeration(
   UINT8 Data;
   UINT8 DataLength;
 
-  for (UINT8 i=0; i < BHS_MAX_SMB_INSTANCE; i++) {
+  //Save Periodic poll command enable status
+  for (UINT8 i = 0; i < BHS_MAX_SMB_INSTANCE; i++) {
+    PpCmdEnblReg[i] = MmioRead16(I3cSpdBusBaseAddress[i] + 0x26C);
+    MmioWrite16(I3cSpdBusBaseAddress[i] + 0x26C, 0x0000);
+  }
+
+  for (UINT8 i=0; i<BHS_MAX_SMB_INSTANCE; i++) {
     if (I3cDevStatus & ((UINT8)BIT0 << i)) {
       DevCapabilites.Data = MmioRead32(I3cSpdBusBaseAddress[i] + DEVICE_CAPABILITIES_SB_I3C0_REG);
       //Print(L"DetectSPD %d - 0x%04X\n", i, DevCapabilites.Data);
@@ -427,8 +461,17 @@ SpdEnumeration(
         continue;
       }
 
+      Status = InitSpdAddressingMode(I3cSpdBusBaseAddress[i]);
+  
     }
   }
+
+
+  //Restore Periodic poll command enable status
+  for (UINT8 i = 0; i < BHS_MAX_SMB_INSTANCE; i++) {
+    MmioWrite16(I3cSpdBusBaseAddress[i] + 0x26C, PpCmdEnblReg[i]);
+  }
+
 
   return EFI_SUCCESS;
 }
@@ -483,4 +526,180 @@ InitI3CDevices(
   return EFI_SUCCESS;
 }
 
+EFI_STATUS
+InitSpdAddressingMode(
+  UINT32 I3cInstanceAddress
+)
+{
+  EFI_STATUS                          Status = EFI_SUCCESS;
+  SMB_DEVICE_STRUCT                   SpdDev;
+  SPD_DDR5_MR11_STRUCT                Mr11Data;
+  SPD_DDR5_ADDRESS_FIRST_BYTE_STRUCT  AddressData;
+  UINT8                               SpdI2cAddressingMode;
 
+  SpdI2cAddressingMode = I2C_2_BYTES_MODE;
+
+  //
+  // Fill out relevant data for a SPD SMbus transaction
+  //
+  SpdDev.compId = SPD;
+  SpdDev.address.controller = PLATFORM_SMBUS_CONTROLLER_PROCESSOR;
+  SpdDev.address.deviceType = DTI_EEPROM;
+  SpdDev.address.SmbSocket = 0;
+  SpdDev.address.I2cTwoBytesMode = SpdI2cAddressingMode;
+
+  //
+  // Init MR11 addressing mode and set page 0
+  //
+  AddressData.Data = 0;
+  AddressData.Bits.MemReg = SPD_INTERNAL_REGISTER;
+  AddressData.Bits.Address = SMB_MR11_ADDR;
+
+  for (UINT8 i=0; i<MAX_CH_DDR; i++) {
+    SpdDev.address.strapAddress = StrapAddress[i];
+    Mr11Data.Data = 0;
+    Status = ReadProcSmb(I3cInstanceAddress, SpdDev, AddressData.Data, &Mr11Data.Data);
+
+    if ((Status == EFI_SUCCESS) && ((Mr11Data.Bits.I2cLegacyMode != SpdI2cAddressingMode) || (Mr11Data.Bits.Page != 0))) {
+      //
+      // Init addressing mode and page 0
+      //
+      Mr11Data.Bits.I2cLegacyMode = SpdI2cAddressingMode;
+      Mr11Data.Bits.Page = 0;  //Initial to page 0
+      //Status = WriteSpdRegTarget(SpdDev, AddressData.Data, &Mr11Data.Data);
+    }
+  }
+
+  return Status;
+}
+
+EFI_STATUS
+ReadProcSmb(
+  UINT32             I3cInstanceAddress,
+  SMB_DEVICE_STRUCT  Dev,
+  UINT8              ByteOffset,
+  volatile UINT8*    Data
+)
+{
+  EFI_STATUS  Status = EFI_SUCCESS;
+  UINT16      Data16 = 0;
+
+  Status = SmbReadCommon(I3cInstanceAddress, Dev, ByteOffset, &Data16);
+  if (EFI_ERROR(Status)) {
+    Status = EFI_SUCCESS;
+    Data16 = 0;
+  }
+
+  *Data = (UINT8) Data16;
+
+  return Status;
+}
+
+EFI_STATUS
+SmbReadCommon(
+  UINT32             I3cInstanceAddress,
+  SMB_DEVICE_STRUCT  Dev,
+  UINT8              ByteOffset,
+  volatile UINT16*   Data
+)
+{
+  EFI_STATUS                              Status = EFI_SUCCESS;
+  //UINT32                                  Timeout;
+  RESPONSE_QUEUE_PORT_I3C0_STRUCT         I3cResp;
+  UINT8                                   TransactionID;
+  UINT8                                   I2cOrI3c;
+  UINT8                                   SubOffsetLen;
+  UINT32                                  SubOffset;
+  COMMAND_QUEUE_PORT_I3C0_STRUCT          CmdPort;
+  COMBO_TRANSFER_COMMAND_LOW_WITHOUT_DAT  ComboCommandLow;
+  COMBO_TRANSFER_COMMAND_HIGH_WITHOUT_DAT ComboCommandHigh;
+  // Same address with RX_DATA_PORT and TX_DATA_PORT, single bi-direction design
+  volatile DATA_PORT_I3C0_STRUCT          DataPort;
+  INTR_STATUS_I3C0_STRUCT                 I3cStatus;
+
+  TransactionID = TidRead;
+  I2cOrI3c = I3C_DEVICE;
+  SubOffsetLen = SUBOFFSET_16_BIT;
+  SubOffset = (Dev.SpdPage | (ByteOffset << 8));  // The low byte should follow the definition of SPD_DDR5_ADDRESS_SECOND_BYTE_STRUCT
+
+  //
+  // Form read command
+  //
+  ComboCommandLow.Data = 0x0;
+  ComboCommandLow.Bits.com_attr = I3C_COM_ATTR_WWR_COMBO_XFER;  
+  ComboCommandLow.Bits.tid = TransactionID;
+  ComboCommandLow.Bits.i2cni3c = I2cOrI3c;
+  ComboCommandLow.Bits.slave_address = (UINT32)((Dev.address.deviceType << I3C_STRAP_ADDRESS_OFFSET) | Dev.address.strapAddress);
+  
+  ComboCommandLow.Bits.suboffset_16_bit = SubOffsetLen;
+  ComboCommandLow.Bits.mode_speed = I3cSdr0I2cFm;
+  ComboCommandLow.Bits.rnw = RNW_READ; 
+  ComboCommandLow.Bits.roc = ROC_REQUIRED; 
+  ComboCommandLow.Bits.toc = TOC_STOP;
+
+  ComboCommandHigh.Data = 0x0;
+  ComboCommandHigh.Bits.offset_suboffset = SubOffset;
+
+  if (Dev.compId == MTS) {
+    ComboCommandHigh.Bits.data_length = 0x2;
+  }
+  else {
+    ComboCommandHigh.Bits.data_length = 1;
+  }
+
+  CmdPort.Data = 0x0;
+  CmdPort.Bits.command = ComboCommandLow.Data;  //write Low data
+  Status = WaitForHostNotBusyTarget(I3cInstanceAddress);
+  if (EFI_ERROR(Status)) {
+
+    return EFI_DEVICE_ERROR;
+  }
+  MmioWrite32(I3cInstanceAddress + COMMAND_QUEUE_PORT_I3C0_REG, CmdPort.Bits.command);
+
+  CmdPort.Bits.command = ComboCommandLow.Data; //write high data
+  Status = WaitForHostNotBusyTarget(I3cInstanceAddress);
+  if (EFI_ERROR(Status)) {
+
+    return EFI_DEVICE_ERROR;
+  }
+  MmioWrite32(I3cInstanceAddress + COMMAND_QUEUE_PORT_I3C0_REG, CmdPort.Bits.command);
+
+  Status = WaitForWriteToCompleteTarget(I3cInstanceAddress);
+  if (EFI_ERROR(Status)) {
+    return EFI_DEVICE_ERROR;
+  }
+
+  Status = WaitForDataReadyRead(I3cInstanceAddress);
+  if (EFI_ERROR(Status)) {
+    return EFI_DEVICE_ERROR;
+  }
+
+  //
+  // If read data is valid
+  //
+  I3cStatus.Data = MmioRead32(I3cInstanceAddress + INTR_STATUS_I3C0_REG);
+  if ((I3cStatus.Bits.rx_thld_stat == 1) && (I3cStatus.Bits.transfer_err_stat == 0)) {
+    DataPort.Data = MmioRead32(I3cInstanceAddress + DATA_PORT_I3C0_REG);
+
+    if (Dev.compId == MTS) {
+      *Data = (UINT16)(DataPort.Bits.data_port & WORD_MASK); //lsb + msb
+    }
+    else {
+      *Data = (UINT16)(DataPort.Bits.data_port & BYTE_MASK); //lsb
+    }
+  }
+  else {
+    Status = EFI_DEVICE_ERROR;
+  }
+
+  //
+  // Check response status
+  //
+  I3cResp.Data = MmioRead32(I3cInstanceAddress + RESPONSE_QUEUE_PORT_I3C0_REG);
+  if ((I3cResp.Bits.tid != TransactionID) || I3cResp.Bits.err_status) {
+    Status = EFI_DEVICE_ERROR;
+  }
+
+
+  return Status;
+}

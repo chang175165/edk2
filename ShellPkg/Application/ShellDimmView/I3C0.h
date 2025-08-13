@@ -295,7 +295,7 @@ typedef union {
 
 typedef union {
   struct {
-    UINT32 tx_data_port : 32; /**< TX_DATA_PORT */
+    UINT32 data_port : 32; /**< TX_DATA_PORT */
 
                             /* Bits[31:0], Access Type=WO, default=0x00000000*/
 
