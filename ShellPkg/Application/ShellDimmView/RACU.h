@@ -70,7 +70,12 @@ WaitForHostNotBusyTarget (
 );
 
 EFI_STATUS
-WaitForDataReadyRead(
+WaitForDataReadyRead (
+  UINT32
+);
+
+EFI_STATUS
+CheckTxFiFoSpace(
   UINT32
 );
 
@@ -108,6 +113,27 @@ SmbReadCommon (
   SMB_DEVICE_STRUCT,
   UINT8 ,
   volatile UINT16*
+);
+
+EFI_STATUS
+WriteProcSmb (
+  UINT32,
+  SMB_DEVICE_STRUCT,
+  UINT8,
+  volatile UINT8*
+);
+
+EFI_STATUS
+SmbWriteCommon(
+  UINT32,
+  SMB_DEVICE_STRUCT,
+  UINT8,
+  volatile UINT16*
+);
+
+EFI_STATUS
+ResetProcSmb(
+  UINT32
 );
 
 #endif _RACU_H_

@@ -465,4 +465,391 @@ typedef union {
 } SCL_I2C_FM_TIMING_I3C0_STRUCT;
 
 
+#define COMMON_DEVICE_CTRL_I3C0_REG   0x018
+
+typedef union {
+  struct {
+    UINT32 ibi_payload : 1; /**< IBI_PAYLOAD */
+
+                            /* Bits[0:0], Access Type=RW, default=0x00000001*/
+
+                            /* --- */
+
+    UINT32 sir_reject : 1; /**< SIR_REJECT */
+
+                            /* Bits[1:1], Access Type=RW, default=0x00000000*/
+
+                            /* --- */
+
+    UINT32 mr_reject : 1; /**< MR_REJECT */
+
+                            /* Bits[2:2], Access Type=RW, default=0x00000001*/
+
+                            /* --- */
+
+    UINT32 reserved_3_28 : 26; /**< RESERVED_3_28 */
+
+                            /* Bits[28:3], Access Type=RO, default=0x00000000*/
+
+                            /* --- */
+
+    UINT32 dev_nack_retry_cnt : 2; /**< DEV_NACK_RETRY_CNT */
+
+                            /* Bits[30:29], Access Type=RW, default=0x00000000*/
+
+                            /* --- */
+
+    UINT32 reserved_31_31 : 1; /**< RESERVED_31_31 */
+
+                            /* Bits[31:31], Access Type=RO, default=0x00000000*/
+
+                            /* --- */
+
+  }     Bits;
+  UINT32 Data;
+} COMMON_DEVICE_CTRL_I3C0_STRUCT;
+
+
+/** QUEUE_THLD_CTRL_SB_I3C0 desc:
+  * Register default value:        0x00200002
+  * Register full path in IP: sb_i3c_top_regs/sb_i3c_0/sb_i3c_ctrl_sb_i3c_ctrl_prim/QUEUE_THLD_CTRL
+  * Security PolicyGroup: SB_I3C_MMIO_REGS_GP
+  * QUEUE_THLD_CTRL
+  */
+
+#define QUEUE_THLD_CTRL_I3C0_REG      0x0d0
+
+typedef union {
+  struct {
+    UINT32 cmd_empty_buf_thld : 8; /**< CMD_EMPTY_BUF_THLD */
+
+                            /* Bits[7:0], Access Type=RW, default=0x00000002*/
+
+                            /* --- */
+
+    UINT32 resp_buf_thld : 8; /**< RESP_BUF_THLD */
+
+                            /* Bits[15:8], Access Type=RW, default=0x00000000*/
+
+                            /* --- */
+
+    UINT32 ibi_data_thld : 8; /**< IBI_DATA_THLD */
+
+                            /* Bits[23:16], Access Type=RW, default=0x00000020*/
+
+                            /* --- */
+
+    UINT32 ibi_status_thld : 8; /**< IBI_STATUS_THLD */
+
+                            /* Bits[31:24], Access Type=RW, default=0x00000000*/
+
+                            /* --- */
+
+  }     Bits;
+  UINT32 Data;
+} QUEUE_THLD_CTRL_I3C0_STRUCT;
+
+
+/** RESET_CTRL_SB_I3C0 desc:
+  * Register default value:        0x00000000
+  * Register full path in IP: sb_i3c_top_regs/sb_i3c_0/sb_i3c_ctrl_sb_i3c_ctrl_prim/RESET_CTRL
+  * Security PolicyGroup: SB_I3C_MMIO_REGS_GP
+  * RESET_CTRL
+  */
+
+#define RESET_CTRL_I3C0_REG           0x010
+
+typedef union {
+  struct {
+    UINT32 soft_rst : 1; /**< SOFT_RST */
+
+                            /* Bits[0:0], Access Type=RW/V, default=0x00000000*/
+
+                            /* --- */
+
+    UINT32 cmd_queue_rst : 1; /**< CMD_QUEUE_RST */
+
+                            /* Bits[1:1], Access Type=RW/V, default=0x00000000*/
+
+                            /* --- */
+
+    UINT32 resp_queue_rst : 1; /**< RESP_QUEUE_RST */
+
+                            /* Bits[2:2], Access Type=RW/V, default=0x00000000*/
+
+                            /* --- */
+
+    UINT32 tx_fifo_rst : 1; /**< TX_FIFO_RST */
+
+                            /* Bits[3:3], Access Type=RW/V, default=0x00000000*/
+
+                            /* --- */
+
+    UINT32 rx_fifo_rst : 1; /**< RX_FIFO_RST */
+
+                            /* Bits[4:4], Access Type=RW/V, default=0x00000000*/
+
+                            /* --- */
+
+    UINT32 ibi_queue_rst : 1; /**< IBI_QUEUE_RST */
+
+                            /* Bits[5:5], Access Type=RW/V, default=0x00000000*/
+
+                            /* --- */
+
+    UINT32 reserved_6_28 : 23; /**< RESERVED_6_28 */
+
+                            /* Bits[28:6], Access Type=RO, default=0x00000000*/
+
+                            /* --- */
+
+    UINT32 bus_reset_type : 2; /**< BUS_RESET_TYPE */
+
+                            /* Bits[30:29], Access Type=RW/V, default=0x00000000*/
+
+                            /* --- */
+
+    UINT32 bus_reset : 1; /**< BUS_RESET */
+
+                            /* Bits[31:31], Access Type=RW/V, default=0x00000000*/
+
+                            /* --- */
+
+  }     Bits;
+  UINT32 Data;
+} RESET_CTRL_I3C0_STRUCT;
+
+
+/** SCL_LOW_MST_EXT_TIMEOUT_SB_I3C0 desc:
+  * Register default value:        0x003567E0
+  * Register full path in IP: sb_i3c_top_regs/sb_i3c_0/sb_i3c_ctrl_sb_i3c_ctrl_prim/SCL_LOW_MST_EXT_TIMEOUT
+  * Security PolicyGroup: SB_I3C_MMIO_REGS_GP
+  * SCL_LOW_MST_EXT_TIMEOUT
+  */
+
+#define SCL_LOW_MST_EXT_TIMEOUT_I3C0_REG 0x23c
+
+typedef union {
+  struct {
+    UINT32 scl_low_mst_timeout_count : 26; /**< SCL_LOW_MST_TIMEOUT_COUNT */
+
+                            /* Bits[25:0], Access Type=RW, default=0x003567E0*/
+
+                            /* --- */
+
+    UINT32 reserved_26_31 : 6; /**< RESERVED_26_31 */
+
+                            /* Bits[31:26], Access Type=RO, default=0x00000000*/
+
+                            /* --- */
+
+  }     Bits;
+  UINT32 Data;
+} SCL_LOW_MST_EXT_TIMEOUT_I3C0_STRUCT;
+
+
+/** IBI_NOTIFY_CTRL_SB_I3C0 desc:
+  * Register default value:        0x00000000
+  * Register full path in IP: sb_i3c_top_regs/sb_i3c_0/sb_i3c_ctrl_sb_i3c_ctrl_prim/IBI_NOTIFY_CTRL
+  * Security PolicyGroup: SB_I3C_MMIO_REGS_GP
+  * IBI_NOTIFY_CTRL
+  */
+
+#define IBI_NOTIFY_CTRL_I3C0_REG      0x058
+
+typedef union {
+  struct {
+    UINT32 notify_hj_rejected : 1; /**< NOTIFY_HJ_REJECTED */
+
+                            /* Bits[0:0], Access Type=RW, default=0x00000000*/
+
+                            /* --- */
+
+    UINT32 notify_mr_rejected : 1; /**< NOTIFY_MR_REJECTED */
+
+                            /* Bits[1:1], Access Type=RW, default=0x00000000*/
+
+                            /* --- */
+
+    UINT32 reserved_2_2 : 1; /**< RESERVED_2_2 */
+
+                            /* Bits[2:2], Access Type=RO, default=0x00000000*/
+
+                            /* --- */
+
+    UINT32 notify_sir_rejected : 1; /**< NOTIFY_SIR_REJECTED */
+
+                            /* Bits[3:3], Access Type=RW, default=0x00000000*/
+
+                            /* --- */
+
+    UINT32 reserved_4_31 : 28; /**< RESERVED_4_31 */
+
+                            /* Bits[31:4], Access Type=RO, default=0x00000000*/
+
+                            /* --- */
+
+  }     Bits;
+  UINT32 Data;
+} IBI_NOTIFY_CTRL_I3C0_STRUCT;
+
+
+/** SDA_HOLD_SWITCH_DLY_TIMING_SB_I3C0 desc:
+  * Register default value:        0x00010000
+  * Register full path in IP: sb_i3c_top_regs/sb_i3c_0/sb_i3c_ctrl_sb_i3c_ctrl_prim/SDA_HOLD_SWITCH_DLY_TIMING
+  * Security PolicyGroup: SB_I3C_MMIO_REGS_GP
+  * SDA_HOLD_SWITCH_DLY_TIMING
+  */
+
+#define SDA_HOLD_SWITCH_DLY_TIMING_I3C0_REG 0x230
+
+typedef union {
+  struct {
+    UINT32 sda_od_pp_switch_dly : 3; /**< SDA_OD_PP_SWITCH_DLY */
+
+                            /* Bits[2:0], Access Type=RW, default=0x00000000*/
+
+                            /* --- */
+
+    UINT32 reserved_3_7 : 5; /**< RESERVED_3_7 */
+
+                            /* Bits[7:3], Access Type=RO, default=0x00000000*/
+
+                            /* --- */
+
+    UINT32 sda_pp_od_switch_dly : 3; /**< SDA_PP_OD_SWITCH_DLY */
+
+                            /* Bits[10:8], Access Type=RW, default=0x00000000*/
+
+                            /* --- */
+
+    UINT32 reserved_11_15 : 5; /**< RESERVED_11_15 */
+
+                            /* Bits[15:11], Access Type=RO, default=0x00000000*/
+
+                            /* --- */
+
+    UINT32 sda_tx_hold : 3; /**< SDA_TX_HOLD */
+
+                            /* Bits[18:16], Access Type=RW, default=0x00000001*/
+
+                            /* --- */
+
+    UINT32 reserved_19_23 : 5; /**< RESERVED_19_23 */
+
+                            /* Bits[23:19], Access Type=RO, default=0x00000000*/
+
+                            /* --- */
+
+    UINT32 sda_rx_hold : 3; /**< SDA_RX_HOLD */
+
+                            /* Bits[26:24], Access Type=RW, default=0x00000000*/
+
+                            /* --- */
+
+    UINT32 reserved_27_31 : 5; /**< RESERVED_27_31 */
+
+                            /* Bits[31:27], Access Type=RO, default=0x00000000*/
+
+                            /* --- */
+
+  }     Bits;
+  UINT32 Data;
+} SDA_HOLD_SWITCH_DLY_TIMING_I3C0_STRUCT;
+
+
+/** INTR_STATUS_ENABLE_SB_I3C0 desc:
+  * Register default value:        0x00000000
+  * Register full path in IP: sb_i3c_top_regs/sb_i3c_0/sb_i3c_ctrl_sb_i3c_ctrl_prim/INTR_STATUS_ENABLE
+  * Security PolicyGroup: SB_I3C_MMIO_REGS_GP
+  * INTR_STATUS_ENABLE
+  */
+
+#define INTR_STATUS_ENABLE_I3C0_REG   0x024
+
+typedef union {
+  struct {
+    UINT32 tx_thld_stat_en : 1; /**< TX_THLD_STAT_EN */
+
+                            /* Bits[0:0], Access Type=RW, default=0x00000000*/
+
+                            /* --- */
+
+    UINT32 rx_thld_stat_en : 1; /**< RX_THLD_STAT_EN */
+
+                            /* Bits[1:1], Access Type=RW, default=0x00000000*/
+
+                            /* --- */
+
+    UINT32 ibi_thld_stat_en : 1; /**< IBI_THLD_STAT_EN */
+
+                            /* Bits[2:2], Access Type=RW, default=0x00000000*/
+
+                            /* --- */
+
+    UINT32 cmd_queue_ready_stat_en : 1; /**< CMD_QUEUE_READY_STAT_EN */
+
+                            /* Bits[3:3], Access Type=RW, default=0x00000000*/
+
+                            /* --- */
+
+    UINT32 resp_ready_stat_intr_en : 1; /**< RESP_READY_STAT_INTR_EN */
+
+                            /* Bits[4:4], Access Type=RW, default=0x00000000*/
+
+                            /* --- */
+
+    UINT32 transfer_abort_stat_en : 1; /**< TRANSFER_ABORT_STAT_EN */
+
+                            /* Bits[5:5], Access Type=RW, default=0x00000000*/
+
+                            /* --- */
+
+    UINT32 reserved_6_8 : 3; /**< RESERVED_6_8 */
+
+                            /* Bits[8:6], Access Type=RO, default=0x00000000*/
+
+                            /* --- */
+
+    UINT32 transfer_err_stat_en : 1; /**< TRANSFER_ERR_STAT_EN */
+
+                            /* Bits[9:9], Access Type=RW, default=0x00000000*/
+
+                            /* --- */
+
+    UINT32 hc_internal_err_stat_en : 1; /**< HC_INTERNAL_ERR_STAT_EN */
+
+                            /* Bits[10:10], Access Type=RW, default=0x00000000*/
+
+                            /* --- */
+
+    UINT32 reserved_11_13 : 3; /**< RESERVED_11_13 */
+
+                            /* Bits[13:11], Access Type=RO, default=0x00000000*/
+
+                            /* --- */
+
+    UINT32 ppoll_cmd_miss_stat_en : 1; /**< PPOLL_CMD_MISS_STAT_EN */
+
+                            /* Bits[14:14], Access Type=RW, default=0x00000000*/
+
+                            /* --- */
+
+    UINT32 bus_reset_done_stat_en : 1; /**< BUS_RESET_DONE_STAT_EN */
+
+                            /* Bits[15:15], Access Type=RW, default=0x00000000*/
+
+                            /* --- */
+
+    UINT32 reserved_16_31 : 16; /**< RESERVED_16_31 */
+
+                            /* Bits[31:16], Access Type=RO, default=0x00000000*/
+
+                            /* --- */
+
+  }     Bits;
+  UINT32 Data;
+} INTR_STATUS_ENABLE_I3C0_STRUCT;
+
+
 #endif _I3C0_REGS_H_

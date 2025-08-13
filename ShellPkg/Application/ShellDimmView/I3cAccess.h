@@ -154,7 +154,7 @@
 // simics will running slow when detecting dimm configuration
 // And simics does not need 100000(100ms) to TIMEOUT, So we use 1000(0.1ms) for simics.
 //
-#define  I3C_TIMEOUT    ((GetEmulation () & SIMICS_FLAG) ? 1000:100000)     // 0.1 ms for simics; others 100 ms
+#define  I3C_TIMEOUT      100    // 0.1 ms for simics; others 100 ms
 
 #define  I3C_MAX_DIMM_NUM 8   // I3C is per 8 DIMMs
 #define  MAX_TS_PER_DIMM  2   // 2 TS per DDR5 DIMM
