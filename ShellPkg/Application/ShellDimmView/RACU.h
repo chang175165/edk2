@@ -56,7 +56,8 @@ CheckI3cConfig(
 
 EFI_STATUS
 CheckResponseStatus (
-  UINT32
+  UINT32,
+  UINT8
 );
 
 EFI_STATUS
@@ -133,6 +134,16 @@ SmbWriteCommon(
 
 EFI_STATUS
 ResetProcSmb(
+  UINT32
+);
+
+EFI_STATUS
+I3cBusReset(
+  UINT32
+);
+
+EFI_STATUS
+ResumeProcSmb(
   UINT32
 );
 

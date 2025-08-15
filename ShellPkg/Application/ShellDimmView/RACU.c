@@ -152,13 +152,13 @@ CheckI3cConfig(
       if (I3cDevCtrl.Bits.iba_include == 1 &&
           I3cDevCtrl.Bits.i2c_slave_present == 0 &&
           I3cDevCtrl.Bits.enable == 1) {
-          Print(L"I3C Instance %d has I3C Devices\n", i);
+          //Print(L"I3C Instance %d has I3C Devices\n", i);
           CheckI3cFreq(I3cSpdBusBaseAddress[i]);
           I3cDevStatus |= BIT0 << i;
       }
     }
     else {
-      Print(L"I3C Instance %d is unsupported\n", i);
+      //Print(L"I3C Instance %d is unsupported\n", i);
       return EFI_UNSUPPORTED;
     }
   }
@@ -168,40 +168,37 @@ CheckI3cConfig(
 
 EFI_STATUS
 CheckResponseStatus(
-  UINT32 I3cInstanceAddress
+  UINT32 I3cInstanceAddress,
+  UINT8 TransactionID
 )
 {
   UINT32                                  Timeout;
   RESPONSE_QUEUE_PORT_I3C0_STRUCT         I3cResp;
-  EFI_STATUS                              Status = EFI_DEVICE_ERROR;
+  EFI_STATUS                              Status = EFI_SUCCESS;
 
-  Timeout = 10000;
-
+  Timeout = 100;
   //
   // Wait for there is space in the command queue
   //
+  //Print(L"TransactionID  %x\n", TransactionID);
   do {
     I3cResp.Data = MmioRead32(I3cInstanceAddress + RESPONSE_QUEUE_PORT_I3C0_REG);
 
-    if (I3cResp.Bits.err_status == 0) {
-      Status = EFI_SUCCESS;
-      //Print(L"Response Queue No Error\n");
-      break;
-    }
-
     //MicroSecondDelay(1);
-    gBS->Stall(1000);
+    gBS->Stall(1);
     Timeout--;
 
+    if (Timeout <= 0) {
+      Status = EFI_TIMEOUT;
+      Print(L"CheckResponseStatus%r\n", Status);
+      break;
+    }
     // Wait for timeout
-  } while (Timeout > 0);
+  } while ((I3cResp.Bits.tid != TransactionID) || I3cResp.Bits.err_status);
 
-  if (Timeout <= 0) {
-    Status = EFI_TIMEOUT;
-  }
+  //Print(L"Respone tid:%x Err:%x\n", I3cResp.Bits.tid, I3cResp.Bits.err_status); 
 
   return Status;
-
 }
 
 EFI_STATUS
@@ -227,6 +224,8 @@ CheckTxFiFoSpace(
 
     if (Timeout <= 0) {
       Status = EFI_TIMEOUT;
+      Print(L"CheckTxFiFoSpace: %r\n", Status);
+      break;
     }
     // Wait for timeout
   } while ((I3cStatus.Bits.tx_thld_stat == 0) && (I3cStatus.Bits.transfer_err_stat == 0));
@@ -262,14 +261,17 @@ WaitForWriteToCompleteTarget(
     gBS->Stall(1);
     Timeout--;
 
+    if (Timeout <= 0) {
+      Status = EFI_TIMEOUT;
+      Print(L"WaitForWriteToCompleteTarget: %r\n", Status);
+      break;
+    }
+
     // Wait for timeout
   } while (Timeout > 0);
 
-  if (Timeout <= 0) {
-    Status = EFI_TIMEOUT;
-  }
-
-  
+ 
+    
   return Status;
 }
 
@@ -283,7 +285,6 @@ WaitForHostNotBusyTarget (
   EFI_STATUS                  Status = EFI_DEVICE_ERROR;
 
   Timeout = 100;
-
   //
   // Wait for there is space in the command queue
   //
@@ -300,12 +301,13 @@ WaitForHostNotBusyTarget (
     gBS->Stall(1);
     Timeout--;
 
+    if (Timeout <= 0) {
+      Status = EFI_TIMEOUT;
+      Print(L"WaitForHostNotBusyTarget: %r\n", Status);
+      break;
+    }
     // Wait for timeout
   } while (Timeout > 0);
-
-  if (Timeout <= 0) {
-    Status = EFI_TIMEOUT;
-  }
 
   return Status;
 
@@ -330,6 +332,7 @@ WaitForDataReadyRead(
 
     if (Timeout <= 0) {
       Status = EFI_TIMEOUT;
+      Print(L"WaitForDataReadyRead Error: %r\n", Status);
       break;
     }
 
@@ -447,7 +450,7 @@ SendCccCmd(
     return EFI_DEVICE_ERROR;
   }
 
-  Status = CheckResponseStatus(I3cInstanceAddress);
+  Status = CheckResponseStatus(I3cInstanceAddress, TransactionID);
   if (EFI_ERROR(Status)) {
     return EFI_DEVICE_ERROR;
   }
@@ -472,35 +475,35 @@ SpdEnumeration(
   }
 
   for (UINT8 i=0; i<BHS_MAX_SMB_INSTANCE; i++) {
-    if (I3cDevStatus & ((UINT8)BIT0 << i)) {
+    //if (I3cDevStatus & ((UINT8)BIT0 << i)) {
       DevCapabilites.Data = MmioRead32(I3cSpdBusBaseAddress[i] + DEVICE_CAPABILITIES_SB_I3C0_REG);
       //Print(L"DetectSPD %d - 0x%04X\n", i, DevCapabilites.Data);
       if (DevCapabilites.Bits.combo_command == 0) {
         Print(L"I3C Instance %d: COMBO_COMMAND is not supported\n", i);
-        //return EFI_UNSUPPORTED;
         continue;
       }
-
+      //Print(L"Instance %d - 0x%X\n", i, I3cSpdBusBaseAddress[i]); //brnxxxx 250813
+      //ResetProcSmb(I3cSpdBusBaseAddress[i]);
+      //I3cBusReset(I3cSpdBusBaseAddress[i]);
+      Print(L"Instance %d\n", i);
       Data = 0;
       DataLength = BROADCAST_DATA_LENGTH;
       Status = SendCccCmd(I3cSpdBusBaseAddress[i], CCC_BROADCAST_SETAASA, AttrCccWrite, & Data, & DataLength);
-      if (EFI_ERROR(Status)) {
-        Print(L"Send CCC Cmd fail EFI DEVICE ERROR %d\n", i);
-        //return EFI_DEVICE_ERROR;
-        continue;
-      }
-
-      Status = InitSpdAddressingMode(I3cSpdBusBaseAddress[i]);
-  
-    }
+      Print(L"Send SETAASA Cmd %r\n", Status);
+      //if (EFI_ERROR(Status)) {
+      //  Print(L"Send CCC Cmd fail %r\n", Status);
+      //  continue;
+      //}
+      //else {
+      //}
+      //Status = InitSpdAddressingMode(I3cSpdBusBaseAddress[i]);
+    //}
   }
-
 
   //Restore Periodic poll command enable status
   for (UINT8 i = 0; i < BHS_MAX_SMB_INSTANCE; i++) {
     MmioWrite16(I3cSpdBusBaseAddress[i] + 0x26C, PpCmdEnblReg[i]);
   }
-
 
   return EFI_SUCCESS;
 }
@@ -535,7 +538,6 @@ InitI3CDevices(
         I3cSpdBusBaseAddress[i] = 0;
       }
     }
-    
     //Print(L"spd0 0x%04x\n", I3cSpdBus0BaseAddress);
     //Print(L"spd1 0x%04x\n", I3cSpdBus1BaseAddress);
     //Print(L"spd2 0x%04x\n", I3cSpdBus2BaseAddress);
@@ -550,6 +552,7 @@ InitI3CDevices(
   InitI3cDone = TRUE;
 
   SpdEnumeration();
+  //GatherSPDData();
 
   return EFI_SUCCESS;
 }
@@ -1010,7 +1013,6 @@ ResetProcSmb(
   I3cPp.Bits.i3c_pp_hcnt = 5;
   MmioWrite32(I3cInstanceAddress + SCL_I3C_PP_TIMING_I3C0_REG, I3cPp.Data);
 
-
   I3cOd.Data = MmioRead32(I3cInstanceAddress + SCL_I3C_OD_TIMING_I3C0_REG);
   I3cOd.Bits.i3c_od_lcnt = 0x3c;
   I3cOd.Bits.i3c_od_hcnt = 0x28;
@@ -1020,6 +1022,118 @@ ResetProcSmb(
   I2cFm.Bits.i2c_fm_lcnt = 0x3c;
   I2cFm.Bits.i2c_fm_hcnt = 0x28;
   MmioWrite32(I3cInstanceAddress + SCL_I2C_FM_TIMING_I3C0_REG, I2cFm.Data);
+
+  Print(L"ResetProcSmb %r\n", Status);
+  return Status;
+}
+
+EFI_STATUS
+I3cBusReset(
+  UINT32 I3cInstanceAddress
+)
+{
+  EFI_STATUS                  Status;
+  UINT32                      Timeout;
+  RESET_CTRL_I3C0_STRUCT      ResetCtrl;
+  INTR_STATUS_I3C0_STRUCT     I3cStatus;
+
+  Status = EFI_SUCCESS;
+  //
+  // Perform the SCL LOW TIMEOUT Reset, setup reset pattern and send Reset
+  //
+  ResetCtrl.Data = MmioRead32(I3cInstanceAddress + RESET_CTRL_I3C0_REG);
+  ResetCtrl.Bits.bus_reset_type = (BIT1 + BIT0); // SCL Low Timeout Reset
+  ResetCtrl.Bits.bus_reset = I3C_ENABLE;
+  MmioWrite32(I3cInstanceAddress + RESET_CTRL_I3C0_REG, ResetCtrl.Data);
+
+  //
+  // Wait for bus reset completion.
+  //
+  Timeout = I3C_TIMEOUT;
+  do {
+    I3cStatus.Data = MmioRead32(I3cInstanceAddress + INTR_STATUS_I3C0_REG);
+
+    //MicroSecondDelay(1);
+    gBS->Stall(1000);
+    Timeout--;
+
+    if (Timeout <= 0) {
+      Status = EFI_TIMEOUT;
+      break;
+    }
+
+  } while (I3cStatus.Bits.bus_reset_done_stat == 0);
+
+  if (I3cStatus.Bits.bus_reset_done_stat == 1) {
+    // write 1 to clear
+    MmioWrite32(I3cInstanceAddress + INTR_STATUS_I3C0_REG, I3cStatus.Data);;
+  }
+
+  Print(L"I3cBusReset %r\n", Status);
+  return Status;
+}
+
+EFI_STATUS
+ResumeProcSmb(
+  UINT32 I3cInstanceAddress
+)
+{
+  EFI_STATUS                  Status;
+  UINT32                      Timeout;
+  DEVICE_CONTROL_I3C0_STRUCT  I3cDevCtrl;
+  RESET_CTRL_I3C0_STRUCT      ResetCtrl;
+  INTR_STATUS_I3C0_STRUCT     I3cStatus;
+
+  Status = EFI_SUCCESS;
+
+
+  // reset queue and fifo
+  //ResetCtrl.Data = UsraCsrRead(Socket, Instance, I3cResetReg);
+  ResetCtrl.Data = MmioRead32(I3cInstanceAddress + RESET_CTRL_I3C0_REG);
+  ResetCtrl.Bits.cmd_queue_rst = I3C_ENABLE;
+  ResetCtrl.Bits.resp_queue_rst = I3C_ENABLE;
+  ResetCtrl.Bits.tx_fifo_rst = I3C_ENABLE;
+  ResetCtrl.Bits.rx_fifo_rst = I3C_ENABLE;
+  ResetCtrl.Bits.ibi_queue_rst = I3C_ENABLE;
+  MmioWrite32(I3cInstanceAddress + RESET_CTRL_I3C0_REG, ResetCtrl.Data);
+
+  //
+  // Wait for queue and fifo reset completion.
+  //
+  Timeout = I3C_TIMEOUT;
+
+  do {
+    ResetCtrl.Data = MmioRead32(I3cInstanceAddress + RESET_CTRL_I3C0_REG);
+
+    //MicroSecondDelay(1);
+    gBS->Stall(100);
+    Timeout--;
+
+    if (Timeout <= 0) {
+      Status = EFI_TIMEOUT;
+      break;
+    }
+
+  } while ((ResetCtrl.Bits.cmd_queue_rst == 1) || (ResetCtrl.Bits.resp_queue_rst == 1) || (ResetCtrl.Bits.tx_fifo_rst == 1) ||
+    (ResetCtrl.Bits.rx_fifo_rst == 1) || (ResetCtrl.Bits.ibi_queue_rst == 1));
+
+  //
+  // Check error status
+  //
+  I3cStatus.Data = MmioRead32(I3cInstanceAddress + INTR_STATUS_I3C0_REG);
+
+  if (I3cStatus.Bits.transfer_err_stat == 1) {
+    // write 1 to clear
+    MmioWrite32(I3cInstanceAddress + INTR_STATUS_I3C0_REG, I3cStatus.Data);
+
+  }
+
+  //
+  // Resume I3C
+  //
+  I3cDevCtrl.Data = MmioRead32(I3cInstanceAddress + DEVICE_CONTROL_I3C0_REG);
+  I3cDevCtrl.Bits.resume = 1;
+  MmioWrite32(I3cInstanceAddress + DEVICE_CONTROL_I3C0_REG, I3cDevCtrl.Data);
 
   return Status;
 }
