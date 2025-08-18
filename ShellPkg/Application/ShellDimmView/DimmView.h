@@ -5,6 +5,7 @@
 
 #include <Uefi.h>
 #include <Library/BaseLib.h>
+#include <Library/BaseMemoryLib.h>
 #include <Library/UefiLib.h>
 #include <Library/CpuLib.h>
 #include <Library/IoLib.h>

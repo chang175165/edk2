@@ -94,6 +94,10 @@ SpdEnumeration(
   VOID
 );
 
+VOID
+GatherSPDData(
+  VOID
+);
 
 EFI_STATUS
 InitSpdAddressingMode (
@@ -145,6 +149,19 @@ I3cBusReset(
 EFI_STATUS
 ResumeProcSmb(
   UINT32
+);
+
+EFI_STATUS
+SpdGetModuleType(
+  UINT32  I3cInstanceAddress,
+  UINT8* Type
+);
+
+EFI_STATUS
+SpdReadByte(
+  UINT32,
+  UINT16,
+  UINT8*
 );
 
 #endif _RACU_H_
