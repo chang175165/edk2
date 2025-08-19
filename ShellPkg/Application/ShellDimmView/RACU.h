@@ -45,12 +45,12 @@ SelectI2cFmFreq (
 );
 
 EFI_STATUS
-CheckI3cFreq(
+CheckI3cFreq (
   UINT32
 );
 
 EFI_STATUS
-CheckI3cConfig(
+CheckI3cConfig (
   VOID
 );
 
@@ -76,7 +76,7 @@ WaitForDataReadyRead (
 );
 
 EFI_STATUS
-CheckTxFiFoSpace(
+CheckTxFiFoSpace (
   UINT32
 );
 
@@ -90,12 +90,12 @@ SendCccCmd (
 );
 
 EFI_STATUS
-SpdEnumeration(
+SpdEnumeration (
   VOID
 );
 
 VOID
-GatherSPDData(
+GatherSPDData (
   VOID
 );
 
@@ -129,7 +129,7 @@ WriteProcSmb (
 );
 
 EFI_STATUS
-SmbWriteCommon(
+SmbWriteCommon (
   UINT32,
   SMB_DEVICE_STRUCT,
   UINT8,
@@ -137,17 +137,17 @@ SmbWriteCommon(
 );
 
 EFI_STATUS
-ResetProcSmb(
+ResetProcSmb (
   UINT32
 );
 
 EFI_STATUS
-I3cBusReset(
+I3cBusReset (
   UINT32
 );
 
 EFI_STATUS
-ResumeProcSmb(
+ResumeProcSmb (
   UINT32
 );
 
@@ -157,7 +157,7 @@ SpdGetModuleType (
 );
 
 EFI_STATUS
-SpdGetBaseModuleType(
+SpdGetBaseModuleType (
   UINT32
 );
 
@@ -166,6 +166,80 @@ SpdReadByte (
   UINT32,
   UINT16,
   UINT8*
+);
+
+EFI_STATUS
+ProgramSpdPage (
+  UINT32,
+  UINT8
+);
+
+EFI_STATUS
+SpdHubReadByte (
+  UINT32,
+  UINT8,
+  UINT8*
+);
+
+EFI_STATUS
+Ddr5MontageSpdHubA0Errata (
+  UINT32
+);
+
+EFI_STATUS
+GetCommonDDR5DIMMConfig (
+  UINT32
+);
+
+EFI_STATUS
+SpdGetOperableEndurant (
+  UINT32
+);
+
+EFI_STATUS
+SpdGetRawCardRefDesign (
+  UINT32
+);
+
+EFI_STATUS
+SpdGetDIMMBusWidth (
+  UINT32
+);
+
+EFI_STATUS
+SpdGetModuleManufacturerId (
+  UINT32
+);
+
+EFI_STATUS
+SpdGetDramManufacturerId (
+  UINT32
+);
+
+EFI_STATUS
+SpdGetModuleManufacturingLocation(
+  UINT32
+);
+
+
+EFI_STATUS
+SpdGetModuleManufacturingDate(
+  UINT32
+);
+
+EFI_STATUS
+SpdGetModuleSerialNumber(
+  UINT32
+);
+
+EFI_STATUS
+SpdGetModulePartNum(
+  UINT32
+);
+
+EFI_STATUS
+SpdGetRcdVendor(
+  UINT32
 );
 
 #endif _RACU_H_

@@ -3,6 +3,12 @@
 #ifndef _DDR5_SPD_REGS_H_
 #define _DDR5_SPD_REGS_H_
 
+
+#define SPD_MODULE_PART     18                  // Number of bytes of module part - DDR3
+#define SPD_MODULE_PART_DDR4 20                 // Number of bytes of module part - DDR4
+#define SPD_MODULE_PART_DDR5 30                 // Number of bytes of module part - DDR5
+#define SPD_MODULE_PART_UNUSED  0x20            // Unused Module Part Number bytes, encoded as ASCII blanks
+#define SPD_MODULE_SERIAL    4                  // Number of bytes of Module Serial Number
 //
 // DDR5 SPD Spec 0.986 Register Definitions
 //

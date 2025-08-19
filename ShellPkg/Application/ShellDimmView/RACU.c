@@ -5,7 +5,9 @@
 #include "I3cAccess.h"
 #include "I3C0.h"
 #include "Ddr5Spd.h"
+#include "MemRegs.h"
 #include "RACU.h"
+
 
 BOOLEAN InitI3cDone;
 
@@ -460,6 +462,397 @@ SendCccCmd(
   return EFI_SUCCESS;
 }
 
+
+EFI_STATUS
+SpdGetRcdVendor(
+  UINT32 I3cInstanceAddress
+)
+{
+  UINT8 SpdReg = 0;
+  UINT16 RcdVendor = 0;
+  EFI_STATUS  Status;
+
+  Status = SpdReadByte(I3cInstanceAddress, SPD_RDIMM_LRDIMM_REGISTERING_CLOCK_DRIVER_RCD_MANUFACTURER_ID_CODE_1_REG, &SpdReg);
+  if (EFI_ERROR(Status)) {
+    Print(L"Get Rcd Vendor %r\n", Status);
+    return Status;
+  }
+
+  RcdVendor = (UINT16)(SpdReg << 8);
+
+  Status = SpdReadByte(I3cInstanceAddress, SPD_RDIMM_LRDIMM_REGISTERING_CLOCK_DRIVER_RCD_MANUFACTURER_ID_CODE_0_REG, &SpdReg);
+  if (EFI_ERROR(Status)) {
+    Print(L"Get Rcd Vendor %r\n", Status);
+    return Status;
+  }
+
+  RcdVendor |= (UINT16)(SpdReg & ~BIT7);
+
+  Print(L"RCD Vendor 0x%04X\n", RcdVendor);
+  return Status;
+}
+
+EFI_STATUS
+SpdGetModulePartNum(
+  UINT32 I3cInstanceAddress
+)
+{
+  EFI_STATUS Status;
+  UINT8 RegData[SPD_MODULE_PART_DDR5];
+  
+  for (UINT8 i = 0; i < SPD_MODULE_PART_DDR5; i++) {
+    Status = SpdReadByte(I3cInstanceAddress, SPD_MODULE_PART_NUMBER_0_REG + i, &RegData[i]);
+    if (EFI_ERROR(Status)) {
+      Print(L"SPD Get Module PartNum %r\n", Status);
+      return Status;
+    }
+  }
+
+  Print(L"Part Number:");
+  for (UINT8 i = 0; i < SPD_MODULE_PART_DDR5; i++) {
+    Print(L"%02X", RegData[i]);
+  }
+  Print(L"\n");
+
+  return Status;
+}
+
+EFI_STATUS
+SpdGetModuleSerialNumber(
+  UINT32 I3cInstanceAddress
+)
+{
+  EFI_STATUS Status;
+  UINT8 RegData[SPD_MODULE_SERIAL];
+
+  for (UINT8 i = 0; i < SPD_MODULE_SERIAL; i++) {
+    Status = SpdReadByte(I3cInstanceAddress, SPD_MODULE_SERIAL_NUMBER_0_REG + i, &RegData[i]);
+    if (EFI_ERROR(Status)) {
+      Print(L"SPD Get Module Serial Number %r\n", Status);
+      return Status;
+    }
+  }
+  Print(L"Serial Number: %02X%02X%02X%02X\n", RegData[0], RegData[1], RegData[2], RegData[3]);
+
+  return Status;
+}
+
+EFI_STATUS
+SpdGetModuleManufacturingDate(
+  UINT32 I3cInstanceAddress
+)
+{
+  UINT8 YearByte;
+  UINT8 WeekByte;
+  EFI_STATUS Status;
+
+  Status = SpdReadByte(I3cInstanceAddress, SPD_MODULE_MANUFACTURING_DATE_0_REG, &YearByte);
+  if (EFI_ERROR(Status)) {
+    Print(L"Get Module Manufacturing Date %r\n", Status);
+    return Status;
+  }
+
+  Status = SpdReadByte(I3cInstanceAddress, SPD_MODULE_MANUFACTURING_DATE_1_REG, &WeekByte);
+  if (EFI_ERROR(Status)) {
+    Print(L"Get Module Manufacturing Date %r\n", Status);
+    return Status;
+  }
+
+  Print(L"ModDate: %02X/%02X\n", YearByte, WeekByte);
+
+  return Status;
+}
+
+EFI_STATUS
+SpdGetModuleManufacturingLocation(
+  UINT32 I3cInstanceAddress
+)
+{
+  UINT8             RegData;
+  EFI_STATUS        Status;
+
+  Status = SpdReadByte(I3cInstanceAddress, SPD_MODULE_MANUFACTURING_LOCATION_REG, &RegData);
+  if (EFI_ERROR(Status)) {
+    Print(L"SPD Module Manufacturing Location %r\n", Status);
+    return Status;
+  }
+
+  Print(L"Manufacturing Location: 0x%02X\n", RegData);
+
+  return Status;
+}
+
+EFI_STATUS
+SpdGetDramManufacturerId(
+  UINT32 I3cInstanceAddress
+)
+{
+  EFI_STATUS Status;
+  UINT16  DramManufacturerId;
+  DRAM_MANUFACTURER_ID_CODE_0_STRUCT DramManufactureId0Reg;
+  DRAM_MANUFACTURER_ID_CODE_1_STRUCT DramManufactureId1Reg;
+  //
+  // Get DRAM mfg id from SPD 552-553.
+  //
+  DramManufacturerId = 0;
+  Status = SpdReadByte(I3cInstanceAddress, SPD_DRAM_MANUFACTURER_ID_CODE_0_REG, &DramManufactureId0Reg.Data);
+  if (EFI_ERROR(Status)) {
+    Print(L"Get DRAM Manufacture ID0 %r\n", Status);
+  }
+
+  Status = SpdReadByte(I3cInstanceAddress, SPD_DRAM_MANUFACTURER_ID_CODE_1_REG, &DramManufactureId1Reg.Data);
+  if (EFI_ERROR(Status)) {
+    Print(L"Get DRAM Manufacture ID1 %r\n", Status);
+  }
+
+  DramManufacturerId = (UINT16)(DramManufactureId1Reg.Bits.last_non_zero_byte_dram_manufacturer << 8)
+    | (UINT16)(DramManufactureId0Reg.Bits.number_of_continuation_codes_dram_manufacturer);
+
+  Print(L"Dram Manufactore ID: 0x%04X\n", DramManufacturerId);
+
+  return Status;
+}
+
+
+EFI_STATUS
+SpdGetModuleManufacturerId(
+  UINT32 I3cInstanceAddress
+)
+{
+
+  MODULE_MANUFACTURER_ID_CODE_0_STRUCT ManufactureId0Reg;
+  MODULE_MANUFACTURER_ID_CODE_1_STRUCT ManufactureId1Reg;
+  EFI_STATUS Status;
+  UINT16    Manufactoreid;
+  //
+  // Get module mfg id from SPD 512-513.
+  //
+
+  Manufactoreid = 0;
+  Status = SpdReadByte(I3cInstanceAddress, SPD_MODULE_MANUFACTURER_ID_CODE_0_REG, &ManufactureId0Reg.Data);
+  if (EFI_ERROR(Status)) {
+    Print(L"Get Module Manufacture ID0 %r\n", Status);
+  }
+
+  Status = SpdReadByte(I3cInstanceAddress, SPD_MODULE_MANUFACTURER_ID_CODE_1_REG, &ManufactureId1Reg.Data);
+  if (EFI_ERROR(Status)) {
+    Print(L"Get Module Manufacture ID1 %r\n", Status);
+  }
+
+  Manufactoreid = (UINT16)(ManufactureId1Reg.Bits.last_non_zero_byte_module_manufacturer << 8)
+    | (UINT16)(ManufactureId0Reg.Bits.number_of_continuation_codes_module_manufacturer);
+
+  Print(L"Module Manufactore ID: 0x%04X\n", Manufactoreid);
+
+  return Status;
+}
+
+EFI_STATUS
+SpdGetDIMMBusWidth(
+  UINT32 I3cInstanceAddress
+)
+{
+  EFI_STATUS                              Status;
+  COMMON_MEMORY_CHANNEL_BUS_WIDTH_STRUCT  ChannelBusWidthReg;
+ 
+  Status = SpdReadByte(I3cInstanceAddress, SPD_COMMON_MEMORY_CHANNEL_BUS_WIDTH_REG, &ChannelBusWidthReg.Data);
+  if (EFI_ERROR(Status)) {
+    Print(L"SPD Get Primary Bus Width %r\n", Status);
+    return Status;
+  }
+
+  Print(L"Bus Width Extension %d\n", ChannelBusWidthReg.Bits.bus_width_extension_per_channel_in_bits);
+  Print(L"Number Channels %d\n", ChannelBusWidthReg.Bits.number_of_channels_per_dimm);
+  Print(L"Prinmary Bus Witdh %d\n", ChannelBusWidthReg.Bits.primary_bus_width_per_channel_in_bits);
+
+  return Status;
+}
+
+EFI_STATUS
+SpdGetRawCardRefDesign(
+  UINT32 I3cInstanceAddress
+)
+{
+  COMMON_REFERENCE_RAW_CARD_USED_STRUCT RawCardRefReg;
+  EFI_STATUS Status;
+
+  Status = SpdReadByte(I3cInstanceAddress, SPD_COMMON_REFERENCE_RAW_CARD_USED_REG, &RawCardRefReg.Data);
+  if (EFI_ERROR(Status)) {
+    Print(L"SPD Get Raw Card %r\n", Status);
+    return Status;
+  } 
+  Print(L"Raw Card Design Revision %x Reference Design %x \n",
+    RawCardRefReg.Bits.design_revision, RawCardRefReg.Bits.reference_design);
+
+  return Status;
+}
+
+EFI_STATUS
+SpdGetOperableEndurant(
+  UINT32 I3cInstanceAddress
+)
+{
+  UINT8             Endurant = 0;
+  UINT8             Operable = 0;
+  UINT8             OperableEndurant = 0;
+  EFI_STATUS        Status;
+  SDRAM_NOMINAL_VOLTAGE_VDD_STRUCT    SdramNomVolVdd;
+
+  Status = SpdReadByte(I3cInstanceAddress, SPD_SDRAM_NOMINAL_VOLTAGE_VDD_REG, &SdramNomVolVdd.Data);
+  if (EFI_ERROR(Status)) {
+    Print(L"SPD Get Operable Endurant %r\n");
+    return Status;
+  }
+
+  Operable = SdramNomVolVdd.Bits.operable;
+  Endurant = SdramNomVolVdd.Bits.endurant;
+  OperableEndurant = (Operable << 2) | Endurant;
+  if (OperableEndurant != SPD_VDD_110)
+    Print(L"DIMM does not support 1.10v\n");
+  else
+    Print(L"DIMM Supports 1.10v\n");
+
+  return Status;
+}
+
+EFI_STATUS
+GetCommonDDR5DIMMConfig(
+  UINT32 I3cInstanceAddress
+)
+{
+  EFI_STATUS        Status;
+
+  Status = SpdGetOperableEndurant(I3cInstanceAddress);
+
+  Status = SpdGetRawCardRefDesign(I3cInstanceAddress);
+
+  Status = SpdGetDIMMBusWidth(I3cInstanceAddress);
+
+  Status = SpdGetModuleManufacturerId(I3cInstanceAddress);
+
+  Status = SpdGetDramManufacturerId(I3cInstanceAddress);
+
+  Status = SpdGetModuleManufacturingLocation(I3cInstanceAddress);
+
+  Status = SpdGetModuleManufacturingDate(I3cInstanceAddress);
+
+  Status = SpdGetModuleSerialNumber(I3cInstanceAddress);
+
+  Status = SpdGetModulePartNum(I3cInstanceAddress);
+
+  Status = SpdGetRcdVendor(I3cInstanceAddress);
+
+  return Status;
+}
+
+EFI_STATUS
+Ddr5MontageSpdHubA0Errata(
+  UINT32 I3cInstanceAddress
+)
+{
+  EFI_STATUS    Status = EFI_SUCCESS;
+  UINT8         SPDReg = 0;
+  UINT8         DeviceRevision = 0;
+  UINT16        VendorId;
+  UINT16        DeviceType;
+
+  //
+  // Get Internal Thermal Sensor Device ID
+  // MR0:MR1
+  //
+  SpdHubReadByte(I3cInstanceAddress, SPD_MR0_DEVICE_TYPE_MSB, &SPDReg);
+  DeviceType = SPDReg << 8;
+  SpdHubReadByte(I3cInstanceAddress, SPD_MR1_DEVICE_TYPE_LSB, &SPDReg);
+  DeviceType |= (UINT16)SPDReg;
+  Print(L"MR0:MR1 %X\n", DeviceType);
+
+  //
+  // Get Internal Thermal Sensor Device Revision
+  // MR2[5:1]
+  //
+  SpdHubReadByte(I3cInstanceAddress, SPD_MR2_DEVICE_REVISION, &DeviceRevision);
+  DeviceRevision = (DeviceRevision >> 1) & 0x1f;
+  Print(L"MR2 Device Revision %d\n", DeviceRevision);
+
+  //
+  // Get Internal Thermal Sensor Vendor ID
+  //
+  SpdHubReadByte(I3cInstanceAddress, SPD_MR3_VENDOR_ID_0, &SPDReg);
+  VendorId = SPDReg;
+  SpdHubReadByte(I3cInstanceAddress, SPD_MR4_VENDOR_ID_1, &SPDReg);
+  VendorId |= (SPDReg << 8);
+  Print(L"MR3 VendorID %X\n", VendorId);
+
+
+  return Status;
+}
+
+EFI_STATUS
+SpdHubReadByte(
+  UINT32  I3cInstanceAddress,
+  UINT8   Register,
+  UINT8*  Data
+)
+{
+  EFI_STATUS                          Status = EFI_SUCCESS;
+  SPD_DDR5_ADDRESS_FIRST_BYTE_STRUCT  SmbAddressData;
+
+  SmbAddressData.Data = 0;
+
+  Status = ProgramSpdPage(I3cInstanceAddress, 0);
+  if (EFI_ERROR(Status)) {
+    Print(L"ProgramSpdPage Error\n");
+    return Status;
+  }
+
+  //
+  // MemReg: 1 for NVM location(SPD), 0 for internal register
+  //
+  SmbAddressData.Data = 0;
+  SmbAddressData.Bits.MemReg = SPD_INTERNAL_REGISTER;
+  SmbAddressData.Bits.Address = Register;
+
+  Status = ReadProcSmb(I3cInstanceAddress, Spd, SmbAddressData.Data, Data);
+  if (EFI_ERROR(Status)) {
+    Print(L"SpdHubReadByte %r\n", Status);
+  }
+
+  return Status;
+}
+
+EFI_STATUS
+ProgramSpdPage(
+  UINT32 I3cInstanceAddress,
+  UINT8  SpdPage
+)
+{
+  EFI_STATUS Status;
+  SPD_DDR5_MR11_STRUCT                Mr11Data;
+  SPD_DDR5_ADDRESS_FIRST_BYTE_STRUCT  SmbAddressData;
+  UINT16                              SmbData;
+
+  Mr11Data.Data = 0;
+  SmbAddressData.Data = 0;
+  SmbData = 0;
+
+  // MemReg should be set to 0 for selecting page
+  SmbAddressData.Bits.MemReg = SPD_INTERNAL_REGISTER;
+  SmbAddressData.Bits.Address = SMB_MR11_ADDR;
+
+  // Always use 1 Byte addressing
+  Mr11Data.Bits.I2cLegacyMode = I2C_LEGACY_MODE;
+  Mr11Data.Bits.Page = SpdPage;
+
+  SmbData = Mr11Data.Data;
+  Status = WriteProcSmb(I3cInstanceAddress, Spd, SmbAddressData.Data, (UINT8*)&SmbData);
+  if (EFI_ERROR(Status)) {
+    Print(L"ProgramSpdPage %r\n", Status);
+  }
+  //Print(L"ProgramSpdPage %X %r\n", SmbAddressData.Data, Status);
+
+  return Status;
+}
+
 EFI_STATUS
 SpdReadByte(
   UINT32 I3cInstanceAddress,
@@ -550,14 +943,22 @@ GatherSPDData(
       Spd.address.strapAddress = StrapAddress[j];
       Print(L"Channel %d-%d ", i, Spd.address.strapAddress);
       Status = SpdGetModuleType(I3cSpdBusBaseAddress[i]);
-      if (EFI_ERROR(Status)) {
-        Print(L"Non");
+      if (!EFI_ERROR(Status)) {
+        Status = SpdGetBaseModuleType(I3cSpdBusBaseAddress[i]);
+        if (EFI_ERROR(Status)) {
+          continue;
+        }
+        Status = Ddr5MontageSpdHubA0Errata(I3cSpdBusBaseAddress[i]);
+        if (EFI_ERROR(Status)) {
+          continue;
+        }
+        Status = GetCommonDDR5DIMMConfig(I3cSpdBusBaseAddress[i]);
+        if (EFI_ERROR(Status)) {
+          continue;
+        }
+      } else {
+        Print(L"NON\n");
       }
-      Status = SpdGetBaseModuleType(I3cSpdBusBaseAddress[i]);
-      if (EFI_ERROR(Status)) {
-        //Print(L"\n");
-      }
-      Print(L"\n");
     }
   }
 }
@@ -611,7 +1012,6 @@ SpdEnumeration(
 
   return EFI_SUCCESS;
 }
-
 
 EFI_STATUS
 InitI3CDevices(
@@ -911,9 +1311,9 @@ SmbWriteCommon(
   RegularCommandLow.Bits.cp = CP_TRANFSER;              // 0x0: TRANFSER: Describes SDR transfer. CMD field is not valid.
   RegularCommandLow.Bits.slave_address = (UINT32)((Dev.address.deviceType << I3C_STRAP_ADDRESS_OFFSET) | Dev.address.strapAddress);
   RegularCommandLow.Bits.mode_speed = I3cSdr0I2cFm;
-  RegularCommandLow.Bits.rnw = RNW_WRITE; // 0x0: WRITE: Write transfer
-  RegularCommandLow.Bits.roc = ROC_REQUIRED; // 0x1: REQUIRED: Response Status is required
-  RegularCommandLow.Bits.toc = TOC_STOP; // 0x1: STOP: Stop (P) is issued at end of the transfer
+  RegularCommandLow.Bits.rnw = RNW_WRITE;               // 0x0: WRITE: Write transfer
+  RegularCommandLow.Bits.roc = ROC_REQUIRED;            // 0x1: REQUIRED: Response Status is required
+  RegularCommandLow.Bits.toc = TOC_STOP;                // 0x1: STOP: Stop (P) is issued at end of the transfer
 
   RegularCommandHigh.Data = 0x0;
 
