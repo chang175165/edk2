@@ -242,4 +242,9 @@ SpdGetRcdVendor(
   UINT32
 );
 
+EFI_STATUS
+GetRcdDeviceTypeFromSpd(
+  UINT32
+);
+
 #endif _RACU_H_

@@ -464,6 +464,27 @@ SendCccCmd(
 
 
 EFI_STATUS
+GetRcdDeviceTypeFromSpd(
+  UINT32 I3cInstanceAddress
+)
+{
+  EFI_STATUS Status;
+  RDIMM_LRDIMM_REGISTERING_CLOCK_DRIVER_RCD_DEVICE_TYPE_STRUCT RcdDeviceTypeReg;
+
+  Status = SpdReadByte(I3cInstanceAddress, SPD_RDIMM_LRDIMM_REGISTERING_CLOCK_DRIVER_RCD_DEVICE_TYPE_REG, &RcdDeviceTypeReg.Data);
+  if (EFI_ERROR(Status)) {
+    Print(L"Get RCD Device Type %r\n", I3cInstanceAddress);
+    return Status;
+  }
+  //
+  // RCD device type bit definations is plus 1
+  //
+  Print(L"Rcd Device Type 0x%02X\n", (RcdDeviceTypeReg.Bits.device_type & 0xF) + 1);
+
+  return Status;
+}
+
+EFI_STATUS
 SpdGetRcdVendor(
   UINT32 I3cInstanceAddress
 )
@@ -471,6 +492,10 @@ SpdGetRcdVendor(
   UINT8 SpdReg = 0;
   UINT16 RcdVendor = 0;
   EFI_STATUS  Status;
+
+  //
+  // Registering Clock Driver (RCD) Manufacturer ID Code
+  //
 
   Status = SpdReadByte(I3cInstanceAddress, SPD_RDIMM_LRDIMM_REGISTERING_CLOCK_DRIVER_RCD_MANUFACTURER_ID_CODE_1_REG, &SpdReg);
   if (EFI_ERROR(Status)) {
@@ -741,6 +766,8 @@ GetCommonDDR5DIMMConfig(
   Status = SpdGetModulePartNum(I3cInstanceAddress);
 
   Status = SpdGetRcdVendor(I3cInstanceAddress);
+
+  Status = GetRcdDeviceTypeFromSpd(I3cInstanceAddress);
 
   return Status;
 }
