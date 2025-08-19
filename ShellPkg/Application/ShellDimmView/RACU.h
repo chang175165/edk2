@@ -152,13 +152,17 @@ ResumeProcSmb(
 );
 
 EFI_STATUS
-SpdGetModuleType(
-  UINT32  I3cInstanceAddress,
-  UINT8* Type
+SpdGetModuleType (
+  UINT32
 );
 
 EFI_STATUS
-SpdReadByte(
+SpdGetBaseModuleType(
+  UINT32
+);
+
+EFI_STATUS
+SpdReadByte (
   UINT32,
   UINT16,
   UINT8*

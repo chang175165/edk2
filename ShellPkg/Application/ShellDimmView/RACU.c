@@ -164,7 +164,7 @@ CheckI3cConfig(
       return EFI_UNSUPPORTED;
     }
   }
-  Print(L"I3cDevStatus %x\n", I3cDevStatus);
+  //Print(L"I3cDevStatus %x\n", I3cDevStatus);
   return EFI_SUCCESS;
 }
 
@@ -484,7 +484,24 @@ SpdReadByte(
 
   Status = ReadProcSmb(I3cInstanceAddress, Spd, SmbOffset, Data);
   if (EFI_ERROR(Status)) {
-    Print(L"SpdReadByte %r\n", Status);
+    //Print(L"SpdReadByte %r\n", Status);
+  }
+
+  return Status;
+}
+
+EFI_STATUS
+SpdGetBaseModuleType(
+  UINT32 I3cInstanceAddress
+  )
+{
+  KEY_BYTE_MODULE_TYPE_STRUCT ModuleTypeReg;
+  EFI_STATUS Status;
+
+  Status = SpdReadByte(I3cInstanceAddress, SPD_KEY_BYTE_MODULE_TYPE_REG, &ModuleTypeReg.Data);
+  if (!EFI_ERROR(Status)) {
+    Print(L"Base Module: %X\n", ModuleTypeReg.Bits.base_module_type);
+    Print(L"Hybrid Media: %X , Hybrid: %X\n", ModuleTypeReg.Bits.hybrid_media, ModuleTypeReg.Bits.hybrid);
   }
 
   return Status;
@@ -492,8 +509,7 @@ SpdReadByte(
 
 EFI_STATUS
 SpdGetModuleType(
-  UINT32  I3cInstanceAddress,
-  UINT8* Type
+  UINT32  I3cInstanceAddress
 )
 {
   EFI_STATUS Status;
@@ -502,9 +518,9 @@ SpdGetModuleType(
   KEY_BYTE_HOST_BUS_COMMAND_PROTOCOL_TYPE_STRUCT BusCommandProtocolTypeReg;
   Status = SpdReadByte(I3cInstanceAddress, SPD_KEY_BYTE_HOST_BUS_COMMAND_PROTOCOL_TYPE_REG, &BusCommandProtocolTypeReg.Data);
   if (!EFI_ERROR(Status)) {
-    Print(L"Get Module Type %x\n", BusCommandProtocolTypeReg.Bits.sdram_module_type);
+    Print(L"DIMM Type %X\n", BusCommandProtocolTypeReg.Bits.sdram_module_type);
   }
-
+  
   return Status;
 }
 
@@ -515,20 +531,16 @@ GatherSPDData(
 {
   EFI_STATUS            Status;
 
-  UINT8                 DdrType;
-
   //
   // Initialize common parts of the smbDevice structure for all SPD devices
   //
-  DdrType = 0;
+
   ZeroMem(&Spd, sizeof(Spd));
   Spd.compId = SPD;
   Spd.address.controller = PLATFORM_SMBUS_CONTROLLER_PROCESSOR;
   Spd.address.deviceType = DTI_EEPROM;
   Spd.address.I2cTwoBytesMode = I2C_2_BYTES_MODE;
-  //Spd.address.strapAddress = StrapAddress[2]; //test
-  //Status = SpdGetModuleType(I3cSpdBusBaseAddress[0], &DdrType); //test
-  
+
   for (UINT8 i = 0; i < BHS_MAX_SMB_INSTANCE; i++) {
     if (!(I3cDevStatus & ((UINT8)BIT0 << i))) {
       continue;
@@ -536,19 +548,18 @@ GatherSPDData(
 
     for (UINT8 j = 0; j < sizeof(StrapAddress); j++) {
       Spd.address.strapAddress = StrapAddress[j];
-      Status = SpdGetModuleType(I3cSpdBusBaseAddress[i], &DdrType);
-      Print(L"Module Type %d - %d - %d = %x\n", i, j, StrapAddress[j]);
-      if (!EFI_ERROR(Status)) {
-
+      Print(L"Channel %d-%d ", i, Spd.address.strapAddress);
+      Status = SpdGetModuleType(I3cSpdBusBaseAddress[i]);
+      if (EFI_ERROR(Status)) {
+        Print(L"Non");
       }
-      else {
-        continue;
+      Status = SpdGetBaseModuleType(I3cSpdBusBaseAddress[i]);
+      if (EFI_ERROR(Status)) {
+        //Print(L"\n");
       }
+      Print(L"\n");
     }
-
   }
-  
-
 }
 
 EFI_STATUS
@@ -727,12 +738,12 @@ ReadProcSmb(
   UINT16      Data16 = 0;
 
   Status = SmbReadCommon(I3cInstanceAddress, Dev, ByteOffset, &Data16);
-  if (!EFI_ERROR(Status)) {
-    Status = EFI_SUCCESS;
-    *Data = (UINT8)Data16;
+  if (EFI_ERROR(Status)) {
+    //Print(L"Resume Smb %r\n", ResumeProcSmb(I3cInstanceAddress));
+    ResumeProcSmb(I3cInstanceAddress);
   }
-
-  Data16 = 0;
+ 
+  *Data = (UINT8)Data16;
 
   return Status;
 }
@@ -762,7 +773,7 @@ SmbReadCommon(
   I2cOrI3c = I3C_DEVICE;
   SubOffsetLen = SUBOFFSET_16_BIT;
   SubOffset = (Dev.SpdPage | (ByteOffset << 8));  // The low byte should follow the definition of SPD_DDR5_ADDRESS_SECOND_BYTE_STRUCT
-  Print(L"SmbReadCommon Suboffset %x\n", SubOffset);
+  //Print(L"SmbReadCommon Suboffset %x\n", SubOffset);
   //
   // Form read command
   //
@@ -790,7 +801,7 @@ SmbReadCommon(
 
   CmdPort.Data = 0x0;
   CmdPort.Bits.command = ComboCommandLow.Data;  //write Low data
-  Print(L"Low Command %x\n", CmdPort.Bits.command);
+  //Print(L"Low Command %x\n", CmdPort.Bits.command);
   Status = WaitForHostNotBusyTarget(I3cInstanceAddress);
   if (EFI_ERROR(Status)) {
 
@@ -799,7 +810,7 @@ SmbReadCommon(
   MmioWrite32(I3cInstanceAddress + COMMAND_QUEUE_PORT_I3C0_REG, CmdPort.Bits.command);
 
   CmdPort.Bits.command = ComboCommandHigh.Data; //write high data
-  Print(L"High Command %x\n", CmdPort.Bits.command);
+  //Print(L"High Command %x\n", CmdPort.Bits.command);
   Status = WaitForHostNotBusyTarget(I3cInstanceAddress);
   if (EFI_ERROR(Status)) {
 
@@ -833,7 +844,7 @@ SmbReadCommon(
     }
   }
   else {
-    Print(L"Read Data is non-Valid\n");
+    //Print(L"Read Data is non-Valid\n");
     Status = EFI_DEVICE_ERROR;
   }
 
@@ -878,14 +889,14 @@ SmbWriteCommon(
   volatile UINT16*   Data
 )
 {
-  EFI_STATUS Status = EFI_SUCCESS;
-  RESPONSE_QUEUE_PORT_I3C0_STRUCT         I3cResp;
-  UINT8                                   TransactionID;
-  UINT8                                   I2cOrI3c;
-  COMMAND_QUEUE_PORT_I3C0_STRUCT          CmdPort;
-  REGULAR_DATA_TRANSFER_COMMAND_LOW_WITHOUT_DAT  RegularCommandLow;
-  REGULAR_DATA_TRANSFER_COMMAND_HIGH_WITHOUT_DAT RegularCommandHigh;
-  DATA_PORT_I3C0_STRUCT                   DataPort;
+  EFI_STATUS                                      Status = EFI_SUCCESS;
+  RESPONSE_QUEUE_PORT_I3C0_STRUCT                 I3cResp;
+  UINT8                                           TransactionID;
+  UINT8                                           I2cOrI3c;
+  COMMAND_QUEUE_PORT_I3C0_STRUCT                  CmdPort;
+  REGULAR_DATA_TRANSFER_COMMAND_LOW_WITHOUT_DAT   RegularCommandLow;
+  REGULAR_DATA_TRANSFER_COMMAND_HIGH_WITHOUT_DAT  RegularCommandHigh;
+  DATA_PORT_I3C0_STRUCT                           DataPort;
 
   TransactionID = TidWrite;
   I2cOrI3c = I3C_DEVICE;
@@ -894,10 +905,10 @@ SmbWriteCommon(
   //
   RegularCommandLow.Data = 0x0;
   RegularCommandLow.Bits.com_attr = I3C_COM_ATTR_XFER;  // I3C_COM_ATTR_XFER             0x0  // Regular Transfer
-  RegularCommandLow.Bits.tid = TransactionID; // Transaction ID field is used as identification tag for the command.
-  RegularCommandLow.Bits.i2cni3c = I2cOrI3c; // 0x0: I3C device 0x1: I2C device
+  RegularCommandLow.Bits.tid = TransactionID;           // Transaction ID field is used as identification tag for the command.
+  RegularCommandLow.Bits.i2cni3c = I2cOrI3c;            // 0x0: I3C device 0x1: I2C device
   //RegularCommandLow.Bits.cmd // CMD field is not valid
-  RegularCommandLow.Bits.cp = CP_TRANFSER; // 0x0: TRANFSER: Describes SDR transfer. CMD field is not valid.
+  RegularCommandLow.Bits.cp = CP_TRANFSER;              // 0x0: TRANFSER: Describes SDR transfer. CMD field is not valid.
   RegularCommandLow.Bits.slave_address = (UINT32)((Dev.address.deviceType << I3C_STRAP_ADDRESS_OFFSET) | Dev.address.strapAddress);
   RegularCommandLow.Bits.mode_speed = I3cSdr0I2cFm;
   RegularCommandLow.Bits.rnw = RNW_WRITE; // 0x0: WRITE: Write transfer
