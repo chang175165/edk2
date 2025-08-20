@@ -462,7 +462,6 @@ SendCccCmd(
   return EFI_SUCCESS;
 }
 
-
 EFI_STATUS
 SpdGetDdrMbistCapability(
   UINT32 I3cInstanceAddress
@@ -816,7 +815,6 @@ SpdGetDramManufacturerId(
   return Status;
 }
 
-
 EFI_STATUS
 SpdGetModuleManufacturerId(
   UINT32 I3cInstanceAddress
@@ -1137,7 +1135,7 @@ GatherSPDDataDDR5(
   else if (SPDReg.Bits.spd_bytes_total == 2) SpdSize = 512;
   else if (SPDReg.Bits.spd_bytes_total == 3) SpdSize = 1024;
 
-  Print(L"SPD Size %d\n", SpdSize);
+  Print(L"SPD Size %d Bytes\n", SpdSize);
   SpdBuf = AllocateZeroPool(SpdSize);
   if (SpdBuf == NULL) {
     Print(L"Allcate Zeoro Pool Fail\n");
@@ -1166,7 +1164,6 @@ GatherSPDData(
 )
 {
   EFI_STATUS            Status;
-
   //
   // Initialize common parts of the smbDevice structure for all SPD devices
   //
@@ -1184,9 +1181,9 @@ GatherSPDData(
 
     for (UINT8 j = 0; j < sizeof(StrapAddress); j++) {
       Spd.address.strapAddress = StrapAddress[j];
-      Print(L"Channel %d-%d ", i, Spd.address.strapAddress);
       Status = SpdGetModuleType(I3cSpdBusBaseAddress[i]);
       if (!EFI_ERROR(Status)) {
+        Print(L"Channel %d-%d ", i, Spd.address.strapAddress);
         Status = SpdGetBaseModuleType(I3cSpdBusBaseAddress[i]);
         if (EFI_ERROR(Status)) {
           continue;
@@ -1204,7 +1201,7 @@ GatherSPDData(
           continue;
         }
       } else {
-        Print(L"NON\n");
+        //Print(L"NON\n");
       }
     }
   }
@@ -1635,7 +1632,6 @@ SmbWriteCommon(
 
   return Status;
 }
-
 
 EFI_STATUS
 ResetProcSmb(
