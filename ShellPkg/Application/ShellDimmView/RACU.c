@@ -464,6 +464,184 @@ SendCccCmd(
 
 
 EFI_STATUS
+SpdGetDdrMbistCapability(
+  UINT32 I3cInstanceAddress
+)
+{
+  UINT8 SpdReg = 0;
+  EFI_STATUS Status;
+  UINT8 DdrMbistCapability;
+
+  Status = SpdReadByte(I3cInstanceAddress, SPD_SDRAM_BL32_POST_PACKAGE_REPAIR_REG, &SpdReg);
+  if (EFI_ERROR(Status)) {
+    Print(L"SPD Get DDR MBIST %r\n", Status);
+    return Status;
+  }
+
+  DdrMbistCapability = (SpdReg & BIT1) >> 1;
+
+  Print(L"DDR MBIST Capability 0x%02X\n", DdrMbistCapability);
+
+  return Status;
+}
+
+EFI_STATUS
+SpdGetSpdMfgId(
+  UINT32 I3cInstanceAddress
+)
+{
+  EFI_STATUS  Status;
+  UINT8 SpdReg = 0;
+  UINT16 SpdMfgId = 0;
+
+  Status = SpdReadByte(I3cInstanceAddress, SPD_COMMON_SPD_MANUFACTURER_ID_CODE_1_REG, &SpdReg);
+  if (EFI_ERROR(Status)) {
+    Print(L"Get SPD MFG ID %r\n", Status);
+    return Status;
+  }
+  SpdMfgId = (UINT16)(SpdReg << 8);
+
+  Status = SpdReadByte(I3cInstanceAddress, SPD_COMMON_SPD_MANUFACTURER_ID_CODE_0_REG, &SpdReg);
+  if (EFI_ERROR(Status)) {
+    Print(L"Get SPD MFG ID %r\n", Status);
+    return Status;
+  }
+  SpdMfgId |= (UINT16)(SpdReg & ~BIT7);
+
+  Print(L"SPD MFGID 0x%02X\n", SpdMfgId);
+
+  Status = SpdReadByte(I3cInstanceAddress, SPD_COMMON_SPD_DEVICE_REVISION_REG, &SpdReg);
+  if (EFI_ERROR(Status)) {
+    Print(L"Get SPD Revision %r\n", Status);
+    return Status;
+  }
+  Print(L"SPD Revision 0x%02X\n", SpdReg);
+
+  return Status;
+}
+
+EFI_STATUS
+SpdGetTsodMfgId(
+  UINT32 I3cInstanceAddress
+)
+{
+  EFI_STATUS Status;
+  UINT8 SpdReg = 0;
+  UINT16 TsodMfgId = 0;
+
+  Status = SpdReadByte(I3cInstanceAddress, SPD_COMMON_THERMAL_SENSORS_TS_MANUFACTURER_ID_CODE_1_REG, &SpdReg);
+  if (EFI_ERROR(Status)) {
+    Print(L"SPD Get TSOD MFG ID %r\n", Status);
+    return Status;
+  }
+  TsodMfgId = (UINT16)(SpdReg << 8);
+
+  Status = SpdReadByte(I3cInstanceAddress, SPD_COMMON_THERMAL_SENSORS_TS_MANUFACTURER_ID_CODE_0_REG, &SpdReg);
+  if (EFI_ERROR(Status)) {
+    Print(L"SPD Get TSOD MFG ID %r\n", Status);
+    return Status;
+  }
+  TsodMfgId |= (UINT16)(SpdReg & ~BIT7);
+
+  Print(L"TSOD MFG ID 0x%02X\n", TsodMfgId);
+
+  Status = SpdReadByte(I3cInstanceAddress, SPD_COMMON_THERMAL_SENSORS_TS_DEVICE_REVISION_REG, &SpdReg);
+  if (EFI_ERROR(Status)) {
+    Print(L"SPD Get TS Revision %r\n", Status);
+    return Status;
+  }
+  Print(L"TSOD REVISION 0x%02X\n", SpdReg);
+
+  return Status;
+}
+
+EFI_STATUS
+SpdGetPmicVendor(
+  UINT32 I3cInstanceAddress
+)
+{
+  UINT8   SpdReg = 0;
+  UINT16  PmicVendor = 0;
+  EFI_STATUS Status;
+
+  Status = SpdReadByte(I3cInstanceAddress, SPD_COMMON_PMIC_0_MANUFACTURER_ID_CODE_1_REG, &SpdReg);
+  if (EFI_ERROR(Status)) {
+    Print(L"SPD Get PMIC0 Vendor %r\n", Status);
+    return Status;
+  }
+  PmicVendor = (UINT16)(SpdReg << 8);
+  Status = SpdReadByte(I3cInstanceAddress, SPD_COMMON_PMIC_0_MANUFACTURER_ID_CODE_0_REG, &SpdReg);
+  if (EFI_ERROR(Status)) {
+    Print(L"SPD Get PMIC0 Vendor %r\n", Status);
+    return Status;
+  }
+  PmicVendor |= (UINT16)(SpdReg & ~BIT7);
+  Print(L"PMIC0 ID: 0x%02X\n", PmicVendor);
+
+  Status = SpdReadByte(I3cInstanceAddress, SPD_COMMON_PMIC_0_DEVICE_TYPE_REG, &SpdReg);
+  if (EFI_ERROR(Status)) {
+    Print(L"SPD Get PMIC0 Type %r\n", Status);
+    return Status;
+  }
+  Print(L"PMIC0 Type: 0x%02X\n", SpdReg);
+
+  Status = SpdReadByte(I3cInstanceAddress, SPD_COMMON_PMIC_0_DEVICE_REVISION_REG, &SpdReg);
+  if (EFI_ERROR(Status)) {
+    Print(L"SPD Get PMIC0 Revision %r\n", Status);
+    return Status;
+  }
+  Print(L"PMIC0 Revision: 0x%02X\n", SpdReg);
+
+  Status = SpdReadByte(I3cInstanceAddress, SPD_COMMON_PMIC_1_MANUFACTURER_ID_CODE_1_REG, &SpdReg);
+  if (EFI_ERROR(Status)) {
+    Print(L"SPD Get PMIC1 Vendor %r\n", Status);
+    return Status;
+  }
+  PmicVendor = (UINT16)(SpdReg << 8);
+  Status = SpdReadByte(I3cInstanceAddress, SPD_COMMON_PMIC_1_MANUFACTURER_ID_CODE_0_REG, &SpdReg);
+  if (EFI_ERROR(Status)) {
+    Print(L"SPD Get PMIC1 Vendor %r\n", Status);
+    return Status;
+  }
+  PmicVendor |= (UINT16)(SpdReg & ~BIT7);
+  Print(L"PMIC1 ID: 0x%02X\n", PmicVendor);
+
+  Status = SpdReadByte(I3cInstanceAddress, SPD_COMMON_PMIC_1_DEVICE_TYPE_REG, &SpdReg);
+  if (EFI_ERROR(Status)) {
+    Print(L"SPD Get PMIC1 Type %r\n", Status);
+    return Status;
+  }
+  Print(L"PMCI1 Type 0x%02X\n", SpdReg);
+
+  Status = SpdReadByte(I3cInstanceAddress, SPD_COMMON_PMIC_1_DEVICE_REVISION_REG, &SpdReg);
+  if (EFI_ERROR(Status)) {
+    Print(L"SPD Get PMIC1 Revision %r\n", Status);
+    return Status;
+  }
+  Print(L"PMIC1 Revision: 0x%02X\n", SpdReg);
+
+  return Status;
+}
+
+EFI_STATUS
+SpdGetRcdRevision(
+  UINT32 I3cInstanceAddress
+)
+{
+  EFI_STATUS Status;
+  UINT8 SpdReg = 0;
+
+  Status = SpdReadByte(I3cInstanceAddress, SPD_RDIMM_LRDIMM_REGISTERING_CLOCK_DRIVER_RCD_DEVICE_REVISION_REG, &SpdReg);
+  if (EFI_ERROR(Status)) {
+    Print(L"SPD Get RCD Revision %r\n", Status);
+    return Status;
+  }
+  Print(L"Rcd Revision %02X\n", SpdReg);
+
+  return Status;
+}
+
+EFI_STATUS
 GetRcdDeviceTypeFromSpd(
   UINT32 I3cInstanceAddress
 )
@@ -745,29 +923,24 @@ GetCommonDDR5DIMMConfig(
   UINT32 I3cInstanceAddress
 )
 {
-  EFI_STATUS        Status;
+  EFI_STATUS  Status;
 
   Status = SpdGetOperableEndurant(I3cInstanceAddress);
-
   Status = SpdGetRawCardRefDesign(I3cInstanceAddress);
-
   Status = SpdGetDIMMBusWidth(I3cInstanceAddress);
-
   Status = SpdGetModuleManufacturerId(I3cInstanceAddress);
-
   Status = SpdGetDramManufacturerId(I3cInstanceAddress);
-
   Status = SpdGetModuleManufacturingLocation(I3cInstanceAddress);
-
   Status = SpdGetModuleManufacturingDate(I3cInstanceAddress);
-
   Status = SpdGetModuleSerialNumber(I3cInstanceAddress);
-
   Status = SpdGetModulePartNum(I3cInstanceAddress);
-
   Status = SpdGetRcdVendor(I3cInstanceAddress);
-
   Status = GetRcdDeviceTypeFromSpd(I3cInstanceAddress);
+  Status = SpdGetRcdRevision(I3cInstanceAddress);
+  Status = SpdGetPmicVendor(I3cInstanceAddress);
+  Status = SpdGetTsodMfgId(I3cInstanceAddress);
+  Status = SpdGetSpdMfgId(I3cInstanceAddress);
+  Status = SpdGetDdrMbistCapability(I3cInstanceAddress);
 
   return Status;
 }
@@ -944,6 +1117,49 @@ SpdGetModuleType(
   return Status;
 }
 
+EFI_STATUS
+GatherSPDDataDDR5(
+  UINT32 I3cInstanceAddress
+)
+{
+  EFI_STATUS  Status;
+  UINTN  SpdSize;
+  UINT8* SpdBuf;
+  NUMBER_OF_BYTES_IN_SPD_DEVICE_STRUCT SPDReg;
+
+  Status = SpdReadByte(I3cInstanceAddress, SPD_NUMBER_OF_BYTES_IN_SPD_DEVICE_REG, &SPDReg.Data);
+  if (EFI_ERROR(Status)) {
+    Print(L"SPD Dataa %r\n", Status);
+    return Status;
+  }
+
+  if (SPDReg.Bits.spd_bytes_total == 1) SpdSize = 256;
+  else if (SPDReg.Bits.spd_bytes_total == 2) SpdSize = 512;
+  else if (SPDReg.Bits.spd_bytes_total == 3) SpdSize = 1024;
+
+  Print(L"SPD Size %d\n", SpdSize);
+  SpdBuf = AllocateZeroPool(SpdSize);
+  if (SpdBuf == NULL) {
+    Print(L"Allcate Zeoro Pool Fail\n");
+    return EFI_UNSUPPORTED;
+  }
+  for (UINT16 i = 0; i < SpdSize; i++) {
+    Status = SpdReadByte(I3cInstanceAddress, SPD_NUMBER_OF_BYTES_IN_SPD_DEVICE_REG+i, (UINT8*)(SpdBuf+i));
+    if (EFI_ERROR(Status)) {
+      Print(L"Gather SPD Index %d %r",i,Status);
+      break;
+    }
+    Print(L"%02X",*(UINT8*)(SpdBuf+i));
+
+    if (((1+i) % 16) == 0) Print(L"\n");
+    else Print(L" ");
+  }
+  Print(L"\n");
+  if (SpdBuf != NULL) FreePool(SpdBuf);
+
+  return Status;
+}
+
 VOID
 GatherSPDData(
   VOID
@@ -980,6 +1196,10 @@ GatherSPDData(
           continue;
         }
         Status = GetCommonDDR5DIMMConfig(I3cSpdBusBaseAddress[i]);
+        if (EFI_ERROR(Status)) {
+          continue;
+        }
+        Status = GatherSPDDataDDR5(I3cSpdBusBaseAddress[i]);
         if (EFI_ERROR(Status)) {
           continue;
         }

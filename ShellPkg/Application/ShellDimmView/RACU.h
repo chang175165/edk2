@@ -247,4 +247,34 @@ GetRcdDeviceTypeFromSpd(
   UINT32
 );
 
+EFI_STATUS
+SpdGetRcdRevision(
+  UINT32
+);
+
+EFI_STATUS
+SpdGetPmicVendor(
+  UINT32
+);
+
+EFI_STATUS
+SpdGetTsodMfgId(
+  UINT32
+);
+
+EFI_STATUS
+SpdGetSpdMfgId(
+  UINT32
+);
+
+EFI_STATUS
+SpdGetDdrMbistCapability(
+  UINT32
+);
+
+EFI_STATUS
+GatherSPDDataDDR5(
+  UINT32
+);
+
 #endif _RACU_H_

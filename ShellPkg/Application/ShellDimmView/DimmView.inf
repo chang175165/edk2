@@ -42,3 +42,4 @@
   ShellLib
   UefiBootServicesTableLib
   BaseMemoryLib
+  MemoryAllocationLib
