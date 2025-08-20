@@ -153,7 +153,8 @@ ResumeProcSmb (
 
 EFI_STATUS
 SpdGetModuleType (
-  UINT32
+  UINT32,
+  UINT8*
 );
 
 EFI_STATUS

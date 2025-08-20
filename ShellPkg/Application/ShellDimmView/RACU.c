@@ -1100,7 +1100,8 @@ SpdGetBaseModuleType(
 
 EFI_STATUS
 SpdGetModuleType(
-  UINT32  I3cInstanceAddress
+  UINT32  I3cInstanceAddress,
+  UINT8*  Data
 )
 {
   EFI_STATUS Status;
@@ -1108,10 +1109,13 @@ SpdGetModuleType(
 
   KEY_BYTE_HOST_BUS_COMMAND_PROTOCOL_TYPE_STRUCT BusCommandProtocolTypeReg;
   Status = SpdReadByte(I3cInstanceAddress, SPD_KEY_BYTE_HOST_BUS_COMMAND_PROTOCOL_TYPE_REG, &BusCommandProtocolTypeReg.Data);
-  if (!EFI_ERROR(Status)) {
-    Print(L"DIMM Type %X\n", BusCommandProtocolTypeReg.Bits.sdram_module_type);
+  if (EFI_ERROR(Status)) {
+    //Print(L"DIMM Type %X\n", BusCommandProtocolTypeReg.Bits.sdram_module_type);
+    Print(L"SPD Get Module Type %r\n", Status);
+    return Status;
   }
-  
+  *Data = BusCommandProtocolTypeReg.Bits.sdram_module_type;
+
   return Status;
 }
 
@@ -1163,7 +1167,8 @@ GatherSPDData(
   VOID
 )
 {
-  EFI_STATUS            Status;
+  EFI_STATUS Status;
+  UINT8 DdrType;
   //
   // Initialize common parts of the smbDevice structure for all SPD devices
   //
@@ -1181,9 +1186,9 @@ GatherSPDData(
 
     for (UINT8 j = 0; j < sizeof(StrapAddress); j++) {
       Spd.address.strapAddress = StrapAddress[j];
-      Status = SpdGetModuleType(I3cSpdBusBaseAddress[i]);
+      Status = SpdGetModuleType(I3cSpdBusBaseAddress[i], &DdrType);
       if (!EFI_ERROR(Status)) {
-        Print(L"Channel %d-%d ", i, Spd.address.strapAddress);
+        Print(L"Channel %d-%d DDR Type %x\n", i, Spd.address.strapAddress, DdrType);
         Status = SpdGetBaseModuleType(I3cSpdBusBaseAddress[i]);
         if (EFI_ERROR(Status)) {
           continue;
