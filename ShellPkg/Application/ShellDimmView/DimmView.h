@@ -35,4 +35,9 @@ SmbTsodHandler(
   VOID
 );
 
+EFI_STATUS
+ControllHandler(
+  VOID
+);
+
 #endif _DIMM_VIEW_H_
