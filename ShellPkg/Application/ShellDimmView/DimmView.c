@@ -67,9 +67,7 @@ ControllHandler(
   EFI_EVENT TimerEvent;
   UINTN Index;
   UINTN curCol, curRow;
-
   UINTN Ticks = 0;
-
   const UINT64 ONE_SECOND_100NS = 10 * 1000 * 1000;
   //
   // Get the users response and if valid open the selected port.
@@ -90,10 +88,8 @@ ControllHandler(
   gST->ConOut->ClearScreen(gST->ConOut);
 
   Print(L"Press ESC to exit.\n");
-
   curCol = gST->ConOut->Mode->CursorColumn;
-  curRow = gST->ConOut->Mode->CursorRow;
-
+  curRow = gST->ConOut->Mode->CursorRow
   EFI_EVENT Events[2] = { TimerEvent, gST->ConIn->WaitForKey };
   while (TRUE) {
     Status = gBS->WaitForEvent(2, Events, &Index);
@@ -116,7 +112,6 @@ ControllHandler(
         }
       }
     }
-
   }
 
   gBS->SetTimer(TimerEvent, TimerCancel, 0);

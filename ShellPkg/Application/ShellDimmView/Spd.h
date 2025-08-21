@@ -180,9 +180,9 @@ typedef struct smbDevice {
   UINT16              compId;
 
   ///
-  /// Memory Controller ID.
+  /// I3cInstance Address
   //
-  UINT8               mcId;
+  UINT32               I3cInstance;
 
   ///
   /// SM Bus device address.
