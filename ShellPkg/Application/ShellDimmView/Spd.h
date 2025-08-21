@@ -16,6 +16,30 @@
 #define SPD_WRITE_TIME              5000  // 5 ms write time per Jedec SPD5xx8 Hub Spec
 
 //
+// Mask used in GetDimmTemperatureI3c to check the sign of the temperature
+// xxx0 0000 0010 11xx + 2.75 C
+// xxx1 1111 1111 11xx - 0.25 C
+//
+#define DIMM_TEMP_SIGNED_MASK 0x1FFC
+
+//
+// Mask used in GetDimmTemperatureI3c for sign extend in Dimm temperature
+// if temperature is negative
+//
+#define DIMM_TEMP_SIGN_EXTEND_MASK 0xE000
+//
+// Shift the value to 0.5 C units
+// Original value:
+// xxx0 0000 0010 11xx + 2.75 C
+// xxx1 1111 1111 11xx - 0.25 C
+// So by shifting 3 bits (divide by 8) the value we got:
+// 000 0000 0010 1 + 2.50 C
+// 111 1111 1111 1 - 0.50 C
+//
+#define DIMM_TEMP_SHIFT_UNIT 8
+
+
+//
 // DDR5 specific 4-bit DTI(SPD5 Device Type ID) / LID(Local Device Type ID) Code
 //
 #define DDR5_TS0            0x02  // '0010' specifies TS0

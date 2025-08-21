@@ -94,11 +94,6 @@ SpdEnumeration (
   VOID
 );
 
-VOID
-GatherSPDData (
-  VOID
-);
-
 EFI_STATUS
 InitSpdAddressingMode (
   UINT32
@@ -276,6 +271,14 @@ SpdGetDdrMbistCapability(
 EFI_STATUS
 GatherSPDDataDDR5(
   UINT32
+);
+
+EFI_STATUS
+ReadProcSmbTsod(
+  UINT32,
+  SMB_DEVICE_STRUCT,
+  UINT8,
+  volatile UINT16* Data
 );
 
 #endif _RACU_H_

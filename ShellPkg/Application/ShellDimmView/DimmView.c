@@ -26,16 +26,34 @@
 INTN
 EFIAPI
 ShellAppMain(
-  IN UINTN   Argc,
+  IN UINTN  Argc,
   IN CHAR16** Argv
 )
 {
   EFI_STATUS Status;
-  Status = PopulateCpuType();
+  UINTN Index;
+
+  if (Argc == 1) {
+    Status = PopulateCpuType();
+    return Status;
+  }
+
   Status = InitI3CDevices();
-
-  return EFI_SUCCESS;
-
+  if (Argc >= 2 && Argv[1] != NULL) {
+    for (Index = 1; Index < Argc; Index++) {
+      //Print(L"Argv[%d]: \"%s\"\n", Index, Argv[Index]);
+      if (StrCmp(Argv[Index], L"-dv") == 0) {
+        GatherSPDData();
+        break;
+      }
+      if (StrCmp(Argv[Index], L"-dt") == 0) {
+        Status = SmbTsodHandler();
+        break;
+      }
+    }
+  }
+  
+  return Status;
 }
 
 

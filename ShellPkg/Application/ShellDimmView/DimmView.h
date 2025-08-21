@@ -25,5 +25,14 @@ InitI3CDevices(
   VOID
 );
 
+EFI_STATUS
+GatherSPDData(
+  VOID
+);
+
+EFI_STATUS
+SmbTsodHandler(
+  VOID
+);
 
 #endif _DIMM_VIEW_H_
