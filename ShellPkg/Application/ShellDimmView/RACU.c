@@ -1942,7 +1942,7 @@ SmbTsodHandler(
       if (EFI_ERROR(Status)) {
         continue;
       }
-      Print(L"Channel %d-%d %d ", i, Spd.address.strapAddress, MstData);
+      Print(L"Channel %d-%d ", i, Spd.address.strapAddress);
       MstData &= DIMM_TEMP_SIGNED_MASK;
       if (MstData & BIT12) {
         RawTemperature = (INT16)(MstData | DIMM_TEMP_SIGN_EXTEND_MASK); 
