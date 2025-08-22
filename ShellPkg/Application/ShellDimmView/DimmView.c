@@ -86,10 +86,11 @@ ControllHandler(
 
   gST->ConIn->Reset(gST->ConIn, FALSE);
   gST->ConOut->ClearScreen(gST->ConOut);
+  gST->ConOut->EnableCursor(gST->ConOut, FALSE);
 
   Print(L"Press ESC to exit.\n");
   curCol = gST->ConOut->Mode->CursorColumn;
-  curRow = gST->ConOut->Mode->CursorRow
+  curRow = gST->ConOut->Mode->CursorRow;
   EFI_EVENT Events[2] = { TimerEvent, gST->ConIn->WaitForKey };
   while (TRUE) {
     Status = gBS->WaitForEvent(2, Events, &Index);
@@ -107,15 +108,16 @@ ControllHandler(
     else if (Index == 1) {
       if (!EFI_ERROR(gST->ConIn->ReadKeyStroke(gST->ConIn, &Key))) {
         if (Key.ScanCode == SCAN_ESC) {
-          Print(L"ESC pressed, exiting...\n");
+          Print(L"\nESC pressed, exiting...\n");
           break;
         }
       }
     }
   }
-
+  
   gBS->SetTimer(TimerEvent, TimerCancel, 0);
   gBS->CloseEvent(TimerEvent);
+  gST->ConOut->EnableCursor(gST->ConOut, TRUE);
 
   return Status;
 }

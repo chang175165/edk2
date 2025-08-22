@@ -1922,7 +1922,6 @@ SmbTsodHandler(
   if (!InitI3cDone) return EFI_UNSUPPORTED;
 
   Temperature = MIN_INT16;
-
   for (UINT8 i = 0; i < BHS_MAX_SMB_INSTANCE; i++) {
     if (!(I3cDevStatus & ((UINT8)BIT0 << i))) {
       continue;
@@ -1932,21 +1931,21 @@ SmbTsodHandler(
       Spd.address.strapAddress = StrapAddress[j];
       Status = ReadProcSmbTsod(I3cSpdBusBaseAddress[i], Spd, RegOffset, &MstData);
       if (EFI_ERROR(Status)) {
-        //Print(L"Read Proc Tsod %r\n", Status);
         continue;
       }
       Print(L"Channel %d-%d ", i, Spd.address.strapAddress);
       MstData &= DIMM_TEMP_SIGNED_MASK;
-
       if (MstData & BIT12) {
-        RawTemperature = (INT16)(MstData | DIMM_TEMP_SIGN_EXTEND_MASK);  // Sign extend negative
+        RawTemperature = (INT16)(MstData | DIMM_TEMP_SIGN_EXTEND_MASK); 
       }
       else {
         RawTemperature = MstData;
       }
       // Shift to 0.5 C
       Temperature = MAX(Temperature, RawTemperature / DIMM_TEMP_SHIFT_UNIT);
-      Print(L"DIMM Tempeture %d.%d'C\n", DIMM_TEMP_INTEGER(Temperature), DIMM_TEMP_DECIMAL(Temperature));
+      Print(L"DIMM Tempeture %d.%d'C\n", DIMM_TEMP_INTEGER(Temperature), DIMM_TEMP_DECIMAL(Temperature));     
+      //Print(L"DIMM Tempeture %d.%d\u00B0C\n", DIMM_TEMP_INTEGER(Temperature), DIMM_TEMP_DECIMAL(Temperature));
+      //Print(L"DIMM Tempeture %d.%d\u2103\n", DIMM_TEMP_INTEGER(Temperature), DIMM_TEMP_DECIMAL(Temperature));
     }
   }
 
@@ -1968,14 +1967,15 @@ ReadProcSmbTsod(
   Dev.compId = MTS;
   Dev.address.controller = PLATFORM_SMBUS_CONTROLLER_PROCESSOR;
   Dev.address.deviceType = DDR5_TS0;
+  Dev.address.I2cTwoBytesMode = I2C_2_BYTES_MODE;
   RegOffset = TS5_MR49_TEMP;
-
+ 
   Status = SmbReadCommon(I3cInstanceAddress, Dev, ByteOffset, &Data16);
   if (EFI_ERROR(Status)) {
     //Print(L"Resume Smb %r\n", ResumeProcSmb(I3cInstanceAddress));
     ResumeProcSmb(I3cInstanceAddress);
   }
-
+ 
   *Data = Data16;
 
   return Status;
