@@ -1321,8 +1321,6 @@ InitI3CDevices(
   return EFI_SUCCESS;
 }
 
-
-
 EFI_STATUS
 InitSpdAddressingMode(
   UINT32 I3cInstanceAddress
@@ -1434,8 +1432,19 @@ SmbReadCommon(
 
   TransactionID = TidRead;
   I2cOrI3c = I3C_DEVICE;
-  SubOffsetLen = SUBOFFSET_16_BIT;
-  SubOffset = (Dev.SpdPage | (ByteOffset << 8));  // The low byte should follow the definition of SPD_DDR5_ADDRESS_SECOND_BYTE_STRUCT
+  //SubOffsetLen = SUBOFFSET_16_BIT;
+  //SubOffset = (Dev.SpdPage | (ByteOffset << 8));  // The low byte should follow the definition of SPD_DDR5_ADDRESS_SECOND_BYTE_STRUCT
+
+    // Use 2 bytes addressing when accessing the DDR5 SPD data
+  if ((((I2cOrI3c == I3C_DEVICE) || Dev.address.I2cTwoBytesMode) && (Dev.address.deviceType == DTI_EEPROM))) {
+    SubOffsetLen = SUBOFFSET_16_BIT;
+    SubOffset = (Dev.SpdPage | (ByteOffset << 8));  // The low byte should follow the definition of SPD_DDR5_ADDRESS_SECOND_BYTE_STRUCT
+  }
+  else {
+    SubOffsetLen = SUBOFFSET_8_BIT;
+    SubOffset = ByteOffset;
+  }
+
   //Print(L"SmbReadCommon Suboffset %x\n", SubOffset);
   //
   // Form read command
@@ -1933,7 +1942,7 @@ SmbTsodHandler(
       if (EFI_ERROR(Status)) {
         continue;
       }
-      Print(L"Channel %d-%d ", i, Spd.address.strapAddress);
+      Print(L"Channel %d-%d %d ", i, Spd.address.strapAddress, MstData);
       MstData &= DIMM_TEMP_SIGNED_MASK;
       if (MstData & BIT12) {
         RawTemperature = (INT16)(MstData | DIMM_TEMP_SIGN_EXTEND_MASK); 
@@ -1944,8 +1953,6 @@ SmbTsodHandler(
       // Shift to 0.5 C
       Temperature = MAX(Temperature, RawTemperature / DIMM_TEMP_SHIFT_UNIT);
       Print(L"DIMM Tempeture %d.%d'C\n", DIMM_TEMP_INTEGER(Temperature), DIMM_TEMP_DECIMAL(Temperature));     
-      //Print(L"DIMM Tempeture %d.%d\u00B0C\n", DIMM_TEMP_INTEGER(Temperature), DIMM_TEMP_DECIMAL(Temperature));
-      //Print(L"DIMM Tempeture %d.%d\u2103\n", DIMM_TEMP_INTEGER(Temperature), DIMM_TEMP_DECIMAL(Temperature));
     }
   }
 
@@ -1962,22 +1969,21 @@ ReadProcSmbTsod(
 {
   EFI_STATUS Status;
   UINT16  Data16 = 0;
-  UINT8 RegOffset;
 
   Dev.compId = MTS;
   Dev.address.controller = PLATFORM_SMBUS_CONTROLLER_PROCESSOR;
   Dev.address.deviceType = DDR5_TS0;
-  Dev.address.I2cTwoBytesMode = I2C_2_BYTES_MODE;
-  RegOffset = TS5_MR49_TEMP;
- 
+  Dev.address.I2cTwoBytesMode = I2C_LEGACY_MODE;
+  Dev.SpdPage = 0;
+
+  ByteOffset = TS5_MR49_TEMP;
   Status = SmbReadCommon(I3cInstanceAddress, Dev, ByteOffset, &Data16);
   if (EFI_ERROR(Status)) {
     //Print(L"Resume Smb %r\n", ResumeProcSmb(I3cInstanceAddress));
     ResumeProcSmb(I3cInstanceAddress);
   }
- 
-  *Data = Data16;
 
+  *Data = Data16;
   return Status;
 }
 
