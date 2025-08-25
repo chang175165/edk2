@@ -86,5 +86,126 @@
 BOOLEAN IsIntelCpu = FALSE;
 BOOLEAN IsAmdCpu = FALSE;
 
+#define TjMax   105
+
+/**
+  Thermal Status Information (RO) Contains status information about the
+  processor's thermal sensor and automatic thermal monitoring facilities. See
+  Section 14.7.2, "Thermal Monitor". If CPUID.01H:EDX[22] = 1.
+
+  @param  ECX  MSR_IA32_THERM_STATUS (0x0000019C)
+  @param  EAX  Lower 32-bits of MSR value.
+               Described by the type MSR_IA32_THERM_STATUS_REGISTER.
+  @param  EDX  Upper 32-bits of MSR value.
+               Described by the type MSR_IA32_THERM_STATUS_REGISTER.
+
+  <b>Example usage</b>
+  @code
+  MSR_IA32_THERM_STATUS_REGISTER  Msr;
+
+  Msr.Uint64 = AsmReadMsr64 (MSR_IA32_THERM_STATUS);
+  @endcode
+  @note MSR_IA32_THERM_STATUS is defined as IA32_THERM_STATUS in SDM.
+**/
+#define MSR_IA32_THERM_STATUS  0x0000019C
+
+/**
+  MSR information returned for MSR index #MSR_IA32_THERM_STATUS
+**/
+typedef union {
+  ///
+  /// Individual bit fields
+  ///
+  struct {
+    ///
+    /// [Bit 0] Thermal Status (RO):. If CPUID.01H:EDX[22] = 1.
+    ///
+    UINT32    ThermalStatus : 1;
+    ///
+    /// [Bit 1] Thermal Status Log (R/W):. If CPUID.01H:EDX[22] = 1.
+    ///
+    UINT32    ThermalStatusLog : 1;
+    ///
+    /// [Bit 2] PROCHOT # or FORCEPR# event (RO). If CPUID.01H:EDX[22] = 1.
+    ///
+    UINT32    PROCHOT_FORCEPR_Event : 1;
+    ///
+    /// [Bit 3] PROCHOT # or FORCEPR# log (R/WC0). If CPUID.01H:EDX[22] = 1.
+    ///
+    UINT32    PROCHOT_FORCEPR_Log : 1;
+    ///
+    /// [Bit 4] Critical Temperature Status (RO). If CPUID.01H:EDX[22] = 1.
+    ///
+    UINT32    CriticalTempStatus : 1;
+    ///
+    /// [Bit 5] Critical Temperature Status log (R/WC0).
+    /// If CPUID.01H:EDX[22] = 1.
+    ///
+    UINT32    CriticalTempStatusLog : 1;
+    ///
+    /// [Bit 6] Thermal Threshold #1 Status (RO). If CPUID.01H:ECX[8] = 1.
+    ///
+    UINT32    ThermalThreshold1Status : 1;
+    ///
+    /// [Bit 7] Thermal Threshold #1 log (R/WC0). If CPUID.01H:ECX[8] = 1.
+    ///
+    UINT32    ThermalThreshold1Log : 1;
+    ///
+    /// [Bit 8] Thermal Threshold #2 Status (RO). If CPUID.01H:ECX[8] = 1.
+    ///
+    UINT32    ThermalThreshold2Status : 1;
+    ///
+    /// [Bit 9] Thermal Threshold #2 log (R/WC0). If CPUID.01H:ECX[8] = 1.
+    ///
+    UINT32    ThermalThreshold2Log : 1;
+    ///
+    /// [Bit 10] Power Limitation Status (RO). If CPUID.06H:EAX[4] = 1.
+    ///
+    UINT32    PowerLimitStatus : 1;
+    ///
+    /// [Bit 11] Power Limitation log (R/WC0). If CPUID.06H:EAX[4] = 1.
+    ///
+    UINT32    PowerLimitLog : 1;
+    ///
+    /// [Bit 12] Current Limit Status (RO). If CPUID.06H:EAX[7] = 1.
+    ///
+    UINT32    CurrentLimitStatus : 1;
+    ///
+    /// [Bit 13] Current Limit log (R/WC0). If CPUID.06H:EAX[7] = 1.
+    ///
+    UINT32    CurrentLimitLog : 1;
+    ///
+    /// [Bit 14] Cross Domain Limit Status (RO). If CPUID.06H:EAX[7] = 1.
+    ///
+    UINT32    CrossDomainLimitStatus : 1;
+    ///
+    /// [Bit 15] Cross Domain Limit log (R/WC0). If CPUID.06H:EAX[7] = 1.
+    ///
+    UINT32    CrossDomainLimitLog : 1;
+    ///
+    /// [Bits 22:16] Digital Readout (RO). If CPUID.06H:EAX[0] = 1.
+    ///
+    UINT32    DigitalReadout : 7;
+    UINT32    Reserved1 : 4;
+    ///
+    /// [Bits 30:27] Resolution in Degrees Celsius (RO). If CPUID.06H:EAX[0] =
+    /// 1.
+    ///
+    UINT32    ResolutionInDegreesCelsius : 4;
+    ///
+    /// [Bit 31] Reading Valid (RO). If CPUID.06H:EAX[0] = 1.
+    ///
+    UINT32    ReadingValid : 1;
+    UINT32    Reserved2 : 32;
+  } Bits;
+  ///
+  /// All bit fields as a 32-bit value
+  ///
+  UINT32    Uint32;
+  ///
+  /// All bit fields as a 64-bit value
+  ///
+  UINT64    Uint64;
+} MSR_IA32_THERM_STATUS_REGISTER;
 
 #endif _CPUID_REGS_H_

@@ -40,4 +40,9 @@ ControllHandler(
   VOID
 );
 
+EFI_STATUS
+GetCPUTemperauture(
+  VOID
+);
+
 #endif _DIMM_VIEW_H_

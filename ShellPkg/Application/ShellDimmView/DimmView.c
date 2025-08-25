@@ -99,6 +99,8 @@ ControllHandler(
     }
 
     if (Index == 0) {
+      Status = GetCPUTemperauture();
+      if (EFI_ERROR(Status)) continue;
       Status = SmbTsodHandler();
       if (EFI_ERROR(Status)) continue;
       ++Ticks;
@@ -117,6 +119,7 @@ ControllHandler(
   
   gBS->SetTimer(TimerEvent, TimerCancel, 0);
   gBS->CloseEvent(TimerEvent);
+  gST->ConOut->ClearScreen(gST->ConOut);
   gST->ConOut->EnableCursor(gST->ConOut, TRUE);
 
   return Status;

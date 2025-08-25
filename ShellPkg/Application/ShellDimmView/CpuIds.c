@@ -67,3 +67,22 @@ PopulateCpuType(
 
   return EFI_SUCCESS;
 }
+
+
+EFI_STATUS
+GetCPUTemperauture(
+  VOID
+)
+{
+ 
+  MSR_IA32_THERM_STATUS_REGISTER ThermStatus;
+  UINT8 Temperature;
+  
+  ThermStatus.Uint32 = AsmReadMsr32(MSR_IA32_THERM_STATUS);  
+  Temperature = (UINT8)(ThermStatus.Uint32 >> 16) & 0x7F;
+  if(Temperature > TjMax) return EFI_DEVICE_ERROR;
+
+  Temperature = TjMax - Temperature;
+  Print(L"CPU Temperature: %d'C\n", Temperature);
+  return EFI_SUCCESS;
+}
