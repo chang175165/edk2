@@ -18,7 +18,6 @@
   PLATFORM_VERSION               = 0.3
   DSC_SPECIFICATION              = 0x00010005
   OUTPUT_DIRECTORY               = Build/Emulator$(ARCH)
-
   SUPPORTED_ARCHITECTURES        = X64|IA32
   BUILD_TARGETS                  = DEBUG|RELEASE|NOOPT
   SKUID_IDENTIFIER               = DEFAULT
