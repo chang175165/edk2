@@ -37,6 +37,7 @@
   MemoryAllocationLib|MdePkg/Library/UefiMemoryAllocationLib/UefiMemoryAllocationLib.inf
   UefiLib|MdePkg/Library/UefiLib/UefiLib.inf
   BaseLib|MdePkg/Library/BaseLib/BaseLib.inf
+  SerialPortLib|MdePkg/Library/SerialPortLib/SerialIoLib.inf
   BaseMemoryLib|MdePkg/Library/BaseMemoryLib/BaseMemoryLib.inf
   PrintLib|MdePkg/Library/BasePrintLib/BasePrintLib.inf
   FileHandleLib|MdePkg/Library/UefiFileHandleLib/UefiFileHandleLib.inf
@@ -57,6 +58,9 @@
   BcfgCommandLib|ShellPkg/Library/UefiShellBcfgCommandLib/UefiShellBcfgCommandLib.inf
   AcpiViewCommandLib|ShellPkg/Library/UefiShellAcpiViewCommandLib/UefiShellAcpiViewCommandLib.inf
   IoLib|MdePkg/Library/BaseIoLibIntrinsic/BaseIoLibIntrinsic.inf
+  PciCf8Lib|MdePkg/Library/BasePciCf8Lib/BasePciCf8Lib.inf              #brnxxxx 250807
+  PciLib|MdePkg/Library/BasePciLibCf8/BasePciLibCf8.inf                 #brnxxxx 250807
+  PciExpressLib|MdePkg/Library/BasePciExpressLib/BasePciExpressLib.inf  #brnxxxx 250807
 
   UefiBootManagerLib|MdeModulePkg/Library/UefiBootManagerLib/UefiBootManagerLib.inf
   HobLib|MdePkg/Library/DxeHobLib/DxeHobLib.inf
@@ -131,7 +135,7 @@
   }
 
   ShellPkg/Application/AcpiViewApp/AcpiViewApp.inf
-  ShellPkg/Application/ShellCTestApp/ShellCTestApp.inf
+#  ShellPkg/Application/ShellCTestApp/ShellCTestApp.inf
   ShellPkg/Application/ShellExecTestApp/SA.inf
   ShellPkg/Application/ShellSortTestApp/ShellSortTestApp.inf
 
@@ -155,6 +159,12 @@
       gEfiShellPkgTokenSpaceGuid.PcdShellLibAutoInitialize|FALSE
   }
   ShellPkg/DynamicCommand/VariablePolicyDynamicCommand/VariablePolicyApp.inf
-
+  ShellPkg/Application/ShellTestApp/ShellCTestApp.inf
+  ShellPkg/Application/ShellTestApp/ShellFTestApp.inf
+  ShellPkg/Application/GNRAP/VC.inf
+  ShellPkg/Application/GNRAP/IPReader.inf
+  ShellPkg/Application/GNRAP/IDReader.inf
+  ShellPkg/Application/ShellDimmView/DimmView.inf
+  
 [BuildOptions]
   *_*_*_CC_FLAGS = -D DISABLE_NEW_DEPRECATED_INTERFACES
